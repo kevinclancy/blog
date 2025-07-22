@@ -133,7 +133,6 @@
  * Site footer
  */
 .site-footer {
-  border-top: 1px solid $border-color-01;
   padding: $spacing-unit 0;
 }
 
@@ -255,6 +254,12 @@
   padding-bottom: 18px;
   text-align: center;
   border-bottom: 1px solid $border-color-01;
+}
+
+.post-header-classic {
+  margin-bottom: $spacing-unit;
+  padding-bottom: 18px;
+  text-align: left;
 }
 
 .post-meta {
