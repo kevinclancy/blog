@@ -38,11 +38,11 @@ In MegaZeux, scriptable game characters are idosyncratically called *robots*. Ho
 
 Here are a few examples of Megazuex games:
 
-![Image]({{ site.baserul }}/assets/images/gameloop/mzx-depot-dungeons.png)
+<img src="/assets/images/gameloop/mzx-depot-dungeons.png">
 
 [Depot Dungeons](https://www.digitalmzx.com/show.php?id=2097) is a puzzle game where the player must traverse a dungeon while solving puzzles involving lever pulling and crate pushing, while fighting off aggressive mutant cockroaches.
 
-![Image]({{ site.baserul }}/assets/images/gameloop/mzx-kikan-intro.png)
+<img src="/assets/images/gameloop/mzx-kikan-intro.png">
 
 [Kikan](https://www.digitalmzx.com/show.php?id=1539) is a turn based, story driven RPG similar to games in the Final Fantasy series. Unlike most RPGs, it features a semi-realistic modern setting.
 
@@ -52,15 +52,15 @@ It's extraordinary that MegaZeux was created by a high school kid, Alexis Janson
 
 A typical game scripting scenario can be found at the beginning of *Weirdness*. A character named Roy sits at his computer in his house. If the player touches him, he says "Not now, Jace, I'm busy making UltraZeux games".
 
-![Image]({{ site.baserul }}/assets/images/gameloop/mzx-weirdness-roy-computer.png)
+<img src="/assets/images/gameloop/mzx-weirdness-roy-computer.png">
 
 If the player goes into the basement, he can turn off the fuse box, causing the lights in the house to shut off and destorying Roy's UltraZeux work.
 
-![Image]({{ site.baserul }}/assets/images/gameloop/mzx-weirdness-fusebox-off.png)
+<img src="/assets/images/gameloop/mzx-weirdness-fusebox-off.png">
 
 Roy then walks into the basement and turns the fuse box back on.
 
-![Image]({{ site.baserul }}/assets/images/gameloop/mzx-weirdness-fusebox-on.png)
+<img src="/assets/images/gameloop/mzx-weirdness-fusebox-on.png">
 
 In this scenario, the fuse box itself is a robot. Each robot has a *robotic script*, which is a program pairing several *labels*, which are names of events to respond to, with *handlers*, which are sequences of instructions that the robot should execute in response to these events. When the player attempts to move into the grid cell occupied by the fuse box, the game triggers the fuse box script's "touch" handler, which spawns a dialog asking the player if they want to turn the fuse box off. If they choose "yes" then another handler inside the fuse box's script is executed. This handler sends a "fuse box off" message to Roy. Upon receiving the "fuse box off" message, Roy's robotic script causes him to expresses his frustration and walk into the basement to turn the fuse box back on.
 
@@ -79,7 +79,7 @@ Now that we've highlighted the features that we wish to focus on modelling by ta
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/game-system.drawio.png"
+  src="/assets/images/gameloop/game-system.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 1</figcaption>
@@ -105,7 +105,7 @@ From the discussion above, you may have inferred that computer graphics is not w
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/game-closed-system.drawio.png"
+  src="/assets/images/gameloop/game-closed-system.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 2</figcaption>
@@ -423,4 +423,6 @@ goto "ts1r"
 </p>
 </details>
 
+---
 
+**Next:** [Modelling Tic-Tac-Toe]({% post_url 2025-10-18-modelling-tic-tac-toe %})

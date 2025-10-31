@@ -110,7 +110,7 @@ Schema Types is an experimental schema system for MUMPS, using type syntax to de
 
 After reading the Rust book, I wanted to undertake a simple project that would give me a feel for writing my own Rust programs. I decided to implement the project described by Steve Hollasch's free online book "Ray Tracing in One Weekend". I didn't quite complete the book, getting only through chapter 7. This was a great opportunity for me to brush up on my linear algebra and 3D math skills.
 
-![Image]({{ site.baserul }}/assets/images/raytracer.png)
+<img src="/assets/images/raytracer.png">
 
 # Links
 

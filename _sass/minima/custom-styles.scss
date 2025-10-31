@@ -1,2 +1,8 @@
 // Placeholder to allow defining custom styles that override everything else.
 // (Use `_sass/minima/custom-variables.scss` to override variable defaults)
+
+// Align header H1 with post listings by removing wrapper padding
+.site-header .wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}

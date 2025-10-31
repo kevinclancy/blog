@@ -31,7 +31,7 @@ $$\mathit{nextState} : 1 \times \mathit{GameState} \to \mathit{GameState}$$
 We will construct this closed system out of open systems such as the players. The players are open systems that takes observations of the board state as inputs and produces move choices as outputs. As a rough first approximation, a player can be diagrammed as follows:
 
 <center>
-<img src="{{ site.baserul }}/assets/images/gameloop/ttt-player.drawio.png">
+<img src="/assets/images/gameloop/ttt-player.drawio.png">
 </center>
 
 The above system is considered *open* because its input and output are not one-element sets. Each turn, an element of BoardState is received as input. The player uses the current board state, possibly along with the player's own internal state, to decide a move to submit to the board.
@@ -76,7 +76,7 @@ A dynamical system named $$S$$ can be depicted as follows
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/discrete-dynamical-system.drawio.png"
+  src="/assets/images/gameloop/discrete-dynamical-system.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>
@@ -127,7 +127,7 @@ can be depicted by juxtaposing the two dynamical systems.
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/parallel-product.drawio.png"
+  src="/assets/images/gameloop/parallel-product.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 2</figcaption>
@@ -160,7 +160,7 @@ This system represents a wall clock, which takes no internal input and advances 
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/clock.drawio.png"
+  src="/assets/images/gameloop/clock.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 3</figcaption>
@@ -204,7 +204,7 @@ $$
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/clock-meridiem.drawio.png"
+  src="/assets/images/gameloop/clock-meridiem.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 4</figcaption>
@@ -215,7 +215,7 @@ can be depicted as nesting.
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/compose-clock.drawio.png"
+  src="/assets/images/gameloop/compose-clock.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 5</figcaption>
@@ -265,7 +265,7 @@ Such a post-composition is depicted below
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/24-conversion.drawio.png"
+  src="/assets/images/gameloop/24-conversion.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 6</figcaption>
@@ -331,7 +331,7 @@ $$\mathit{demux}(X,n)$$ is depicted below, where we've elided all but the first 
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/demux.drawio.png"
+  src="/assets/images/gameloop/demux.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 7</figcaption>
@@ -352,7 +352,7 @@ Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at mo
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/mux.drawio.png"
+  src="/assets/images/gameloop/mux.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 8</figcaption>
@@ -388,7 +388,7 @@ The dynamical system underlying our tic-tac-toe game stepper is then depicted as
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/tictactoe-full.drawio.png"
+  src="/assets/images/gameloop/tictactoe-full.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 9</figcaption>
@@ -518,7 +518,7 @@ As a first step, we note that our system can be obtained by wiring together the 
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/tictactoe-full-ab.drawio.png"
+  src="/assets/images/gameloop/tictactoe-full-ab.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 10</figcaption>
@@ -536,7 +536,7 @@ Next, we take their parallel product $$A \otimes B$$, which is depicted below.
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/AB-juxtapose.drawio.png"
+  src="/assets/images/gameloop/AB-juxtapose.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 11</figcaption>
@@ -623,7 +623,7 @@ Diagramatically, the dynamical system for such a setup might look something like
 
 <figure>
 <img
-  src="{{ site.baserul }}/assets/images/gameloop/fuse_box_example.drawio.png"
+  src="/assets/images/gameloop/fuse_box_example.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>Diagram 12</figcaption>
@@ -643,4 +643,4 @@ A robot's behavior then corresponds to a function
 
 $$GameState \times X_1^{★} \times \ldots \times X_n^{★} \to Move \times Y_1^{★} \times \ldots \times Y_m^{★}$$
 
-where $$X_1,\ldots,X_n$$ are the types of the channels the robot receives on and $$Y_1, \ldots, Y_m$$ are the types of the channels the robot sends on. Many issues arise from this, such as which order a robot handles its messages in and how to map between the above function and the robot's dynamical system. These will be covered in the next post, which I have not yet written.
+where $$X_1,\ldots,X_n$$ are the types of the channels the robot receives on and $$Y_1, \ldots, Y_m$$ are the types of the channels the robot sends on. Many issues arise from this, such as which order a robot handles its messages in and how to map between the functions of the above form and robots' dynamical systems. These will be covered in the next post, which I have not yet written.
