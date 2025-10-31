@@ -1,0 +1,57 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.5 Chrome/138.0.7204.251 Electron/37.6.1 Safari/537.36" version="28.2.5">
+  <diagram name="Page-1" id="3ugAGi-zfJiQKw2o05LZ">
+    <mxGraphModel dx="864" dy="947" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" parent="1" source="NkgDHSGSkPJ8LmDH-r5q-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="590" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="660" y="490" />
+              <mxPoint x="660" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJOdvpWhBUs2nhiwSZu9-2" value="Hour" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];labelPosition=center;verticalLabelPosition=top;" vertex="1" connectable="0" parent="NkgDHSGSkPJ8LmDH-r5q-5">
+          <mxGeometry x="-0.9293" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-1" value="Clock" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="370" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-8" value="" style="swimlane;startSize=0;strokeColor=default;dashed=1;dashPattern=1 2;" parent="1" vertex="1">
+          <mxGeometry x="240" y="400" width="380" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-17" value="Hour" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" parent="NkgDHSGSkPJ8LmDH-r5q-8" source="NkgDHSGSkPJ8LmDH-r5q-19" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-40" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" parent="NkgDHSGSkPJ8LmDH-r5q-8" source="NkgDHSGSkPJ8LmDH-r5q-19" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJOdvpWhBUs2nhiwSZu9-3" value="a.m./p.m." style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="NkgDHSGSkPJ8LmDH-r5q-18">
+          <mxGeometry x="-0.6696" y="1" relative="1" as="geometry">
+            <mxPoint y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NkgDHSGSkPJ8LmDH-r5q-19" value="Meridiem" style="rounded=0;whiteSpace=wrap;html=1;" parent="NkgDHSGSkPJ8LmDH-r5q-8" vertex="1">
+          <mxGeometry x="130" y="160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="EJOdvpWhBUs2nhiwSZu9-1" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="490" as="sourcePoint" />
+            <mxPoint x="750" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJOdvpWhBUs2nhiwSZu9-5" value="" style="swimlane;startSize=0;dashed=1;dashPattern=1 2;" vertex="1" parent="1">
+          <mxGeometry x="170" y="320" width="530" height="450" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
