@@ -2,7 +2,7 @@
 layout: post_classic
 title: Modelling MegaZeux
 date: 2025-11-04 09:00 -0700
-published: false
+published: true
 ---
 
 $$\newcommand{vrt}[2]{\left ( \begin{array}{l} #1 \\ #2 \end{array} \right )} $$
@@ -26,7 +26,7 @@ Our model, unlike MegaZeux, will allow all robots to act at once. The game stepp
 
 Then, it executes these two steps in a loop:
 
-1. All robots concurrently use their stored information, received from the environment on the previous step, to update their internal states and send their actions ($$\mathit{Stay}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to the environment.
+1. All robots concurrently use their stored information, received from the environment on the previous step, to update their internal states and send their movement actions ($$\mathit{Idle}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to the environment.
 
 2. The Environment executes the actions received from the robots to the best of its ability. If a robot proposes moving into a wall, off of the game board, or into a location where another robot currently is, then the move is not executed. If multiple robots attempt to move into the same cell then the environment randomly chooses one to move into the cell, committing the "losers" to their present positions. The environment sends the resulting state of the game board back to the robots, along with a boolean indicating to each robot whether its move succeeded.
 
@@ -114,7 +114,7 @@ Our MegaZeux model is parameterized by three natural numbers:
 * w - the width of the board in cells
 * h - the height of the board in cells
 
-Recall that we write a natural number $$m$$ in bold to denote the set of natural numbers that are less than it, i.e. $$\mathbf{m} \defeq \{ 0, \ldots, m-1 \}$$ .
+Recall that we write a natural number $$k$$ in bold to denote the set of natural numbers that are less than it, i.e. $$\mathbf{k} \defeq \{ 0, \ldots, k-1 \}$$ .
 
 The set of board cell locations is then $$\mathbf{w} \times \mathbf{h}$$. Our board state can then be defined as:
 
@@ -126,9 +126,9 @@ $$\mathit{StepType} \defeq 1 + \mathbf{2}^{\mathbf{n}}$$
 
 where the left summand $$1$$ is used for receive steps and the right summand is for send steps.
 
-The state of our environment $$\mathit{Env}$$ is the defined as:
+The state of our environment $$\mathit{Env}$$ is then defined as:
 
-$$\mathit{State}_{\mathit{Env}} \defeq  \mathit{BoardState} \times \mathit{StepType}$$
+$$\mathit{State}_{\mathit{Env}} \defeq \mathit{BoardState} \times \mathit{StepType}$$
 
 Elements of the first component $$\mathbf{2}^{\mathbf{w} \times \mathbf{h}}$$ are functions mapping each board cell location to $$0$$ if the cell is vacant and $$1$$ if the cell contains a wall. Elements of the second component $$(\mathbf{w} \times \mathbf{h})^{\mathbf{n}}$$ map each robot identifier $$i$$ to the cell location at which robot $$i$$ is currently located.
 
@@ -154,7 +154,7 @@ The top-down perspective of the MegaZeux game stepper then looks as follows.
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>
-Diagram 1
+Figure 1
 </figcaption>
 </figure>
 
@@ -166,14 +166,130 @@ Now that we've presented the structure of our possibilistic game stepper as a di
 
 $$\vrt{\mathit{nextState}_{\mathit{Env}}}{\mathit{output}_{\mathit{Env}}} : \vrt{\mathit{State}_{\mathit{Env}}}{\mathit{State}_{\mathit{Env}}} \leftrightarrows \vrt{\mathit{In}_{\mathit{Env}}}{\mathit{Out}_{\mathit{Env}}}$$
 
-where the $$\mathit{output}_{\mathit{Env}}$$ replicates the wall and robot positions to all robots and distributes to each robot the result of its last action:
+Before defining the functions, we introduce a notational convenience. Recall that elements of $$\mathit{Out}_{\mathit{Env}} = (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$ are functions from robot identifiers (elements of $$\mathbf{n}$$) to output values. We can construct such a function using *lambda notation*: the expression $$\lambda i \in \mathbf{n} . (0, \ast)$$ denotes the constant function that always returns $$(0, \ast)$$ regardless of which robot identifier $$i$$ you pass in. Similarly, $$\lambda i \in \mathbf{n} . (1, (m, r, s(i)))$$ denotes the function that takes a robot identifier $$i$$ and returns $$(1, (m, r, s(i)))$$, where $$s(i)$$ is the success value for robot $$i$$. If you're familiar with programming, this is analogous to anonymous functions like Python's `lambda i: (0, star)` or JavaScript's `i => (0, star)`.
 
-$$\mathit{output}_{\mathit{Env}}(w, r, (0, \ast)) \defeq ((0, \ast), \overset{n}{\ldots}, (0, \ast) )$$
+Now, the $$\mathit{output}_{\mathit{Env}}$$ function replicates the wall and robot positions to all robots and distributes to each robot the result of its last action:
 
-$$\mathit{output}_{\mathit{Env}}(w, r, (1, s)) \defeq ((1, (w, r, s(0))), \overset{n}{\ldots}, (1, (w, r, s(n))))$$
+$$\mathit{output}_{\mathit{Env}} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}) \to (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$
 
-and $$\mathit{nextState}_{\mathit{Env}}$$ is defined as follows:
+$$\mathit{output}_{\mathit{Env}}(m, r, (0, \ast)) \defeq \lambda i \in \mathbf{n} . (0, \ast)$$
 
-$$\mathit{nextState}_{\mathit{Env}}(w, r, ()) $$
+$$\mathit{output}_{\mathit{Env}}(m, r, (1, s)) \defeq \lambda i \in \mathbf{n} . (1, (m, r, s(i)))$$
 
+The $$\mathit{nextState}_{\mathit{Env}}$$ passback function has type:
 
+$$\mathit{nextState}_{\mathit{Env}} : \mathit{State}_{\mathit{Env}} \times \mathit{In}_{\mathit{Env}} \to P\mathit{State}_{\mathit{Env}}$$
+
+Expanding the definitions:
+
+$$\mathit{nextState}_{\mathit{Env}} : (\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}})) \times (1 + \mathit{Act})^{\mathbf{n}} \to P(\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}))$$
+
+We need a few helper functions. First, given a robot position map $$r$$ and an action $$a \in \mathit{Act}$$, we define $$\mathit{move}(r, i, a)$$ to compute the proposed new position for robot $$i$$:
+
+$$\mathit{move} : (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathbf{n} \times \mathit{Act} \to \mathbf{w} \times \mathbf{h}$$
+
+$$\mathit{move}(r, i, a) \defeq \begin{cases}
+(x, y) & \text{if } a = I \\
+(x, y - 1) & \text{if } a = N \\
+(x + 1, y) & \text{if } a = E \\
+(x, y + 1) & \text{if } a = S \\
+(x - 1, y) & \text{if } a = W
+\end{cases}$$
+
+$$\text{where } (x, y) \defeq r(i)$$
+
+Next, we need to determine if a move is valid (doesn't hit a wall, go out of bounds, or collide with a robot's current position):
+
+$$\mathit{valid} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathbf{n} \times \mathit{Act} \to \mathbf{2}$$
+
+$$\mathit{valid}(m, r, i, a) \defeq \begin{cases}
+\mathit{true} & \text{if } \mathit{move}(r,i,a) \in \mathbf{w} \times \mathbf{h} \\
+& \land~m(\mathit{move}(r,i,a)) = 0 \\
+& \land~\mathit{move}(r,i,a) \notin \{r(j) \mid j \in \mathbf{n}\} \\
+\mathit{false} & \text{otherwise}
+\end{cases}$$
+
+Now we can define $$\mathit{nextState}_{\mathit{Env}}$$. On a Send step in which the environment's preconditions are satisfied (i.e., all robots provide no input), we transition back to Receive:
+
+$$\mathit{nextState}_{\mathit{Env}}((m, r, (1, s)), \lambda i \in \mathbf{n} . (0, \ast)) \defeq \{(m, r, (0, \ast))\}$$
+
+On a Receive step where the environment's preconditions are satisified (i.e., all robots provide an action), we process the robot actions and non-deterministically resolve conflicts. Let $$a \in (1 + \mathit{Act})^{\mathbf{n}}$$ be the input, where $$a(i) = (1, \alpha_i)$$ for all $$i \in \mathbf{n}$$ and some action $$\alpha_i$$.
+
+For each cell location $$\ell \in \mathbf{w} \times \mathbf{h}$$, let $$\mathit{candidates}(\ell, m, r, a)$$ denote the set of robots attempting to move to $$\ell$$:
+
+$$\mathit{candidates} : (\mathbf{w} \times \mathbf{h}) \times \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathit{Act}^{\mathbf{n}} \to P\mathbf{n}$$
+
+$$\mathit{candidates}(\ell, m, r, a) \defeq \{i \in \mathbf{n} \mid \mathit{valid}(m,r,i,a(i)) \land \mathit{move}(r,i,a(i)) = \ell\}$$
+
+Then we define the set of target locations that robots are attempting to move to:
+
+$$\mathit{targets} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathit{Act}^{\mathbf{n}} \to P(\mathbf{w} \times \mathbf{h})$$
+
+$$\mathit{targets}(m, r, a) \defeq \{ \ell \in \mathbf{w} \times \mathbf{h} \mid |\mathit{candidates}(\ell, m, r, a)| \geq 1 \}$$
+
+> **Definition** For sets $$X$$ and $$Y$$, we write $$X \rightharpoonup Y$$ for the set of partial functions from $$X$$ to $$Y$$,
+> defined as
+>
+> $$X \rightharpoonup Y \defeq \{ f \subseteq X \times Y \mid ((x,y) \in f \wedge (x,z) \in f) \Rightarrow y = z \} $$
+>
+> For $$f \in X \rightharpoonup Y$$, we write $$f(x) \! \downarrow$$ and say that "$$f$$ is defined at $$x$$" when there
+> exists a $$y \in Y$$ with $$(x,y) \in f$$. We write $$f(x) \! \uparrow$$ and say that "$$f$$ is undefined at $$x$$" when no
+> such $$y \in Y$$ exists. When $$f(x) \! \downarrow$$, we write $$f(x)$$ for the unique $$y \in Y$$ with $$(x,y) \in f$$.
+>
+> We define $$\mathit{dom}(f)$$, the domain of the partial function $$f : X \rightharpoonup Y$$, as
+>
+> $$\mathit{dom}(f) \defeq \{ x \mid f(x) \! \downarrow \} $$
+
+For each target, a *resolution* chooses one of the candidates to successfully move into the target.
+
+$$\mathit{resolutions} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathit{Act}^{\mathbf{n}} \to P(\mathbf{w} \times \mathbf{h} \rightharpoonup \mathbf{n})$$
+
+$$\mathit{resolutions}(m, r, a) \defeq \{ q \in \mathbf{w} \times \mathbf{h} \rightharpoonup \mathbf{n} \mid \mathit{dom}(q) = \mathit{targets}(m,r,a) \wedge \forall \ell \in \mathit{dom}(q).~q(\ell) \in \mathit{candidates}(\ell, m, r, a)  \}$$
+
+Given a resolution $$q \in \mathit{resolutions}(m,r,a)$$, we compute the new robot positions and success indicators. The function $$\mathit{nextr}$$ computes the new position for each robot: a robot moves to its target cell if it won the resolution for that cell (i.e., the resolution chose it), otherwise it stays in place.
+
+$$\mathit{nextr} : \mathit{Act}^{\mathbf{n}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (\mathbf{w} \times \mathbf{h} \rightharpoonup \mathbf{n}) \to (\mathbf{w} \times \mathbf{h})^{\mathbf{n}}$$
+
+$$\mathit{nextr}(a,r,q)(i) \defeq \begin{cases}
+\mathit{move}(r, i, a(i)) & \text{if } q(\mathit{move}(r, i, a(i))) = i \\
+r(i) & \text{otherwise}
+\end{cases}$$
+
+The function $$\mathit{success}$$ indicates whether each robot's action succeeded: a robot succeeds if its position changed, or if it chose to idle.
+
+$$\mathit{success} : \mathit{Act}^{\mathbf{n}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (\mathbf{w} \times \mathbf{h} \rightharpoonup \mathbf{n}) \to \mathbf{2}^{\mathbf{n}}$$
+
+$$\mathit{success}(a,r,q)(i) \defeq \begin{cases}
+1 & \text{if } \mathit{nextr}(a,r,q)(i) \neq r(i) \vee a(i) = I \\
+0 & \text{otherwise}
+\end{cases}$$
+
+We can now define the Receive step transition in terms of these helper functions:
+
+$$\mathit{nextState}_{\mathit{Env}}((m, r, (0, \ast)), a) \defeq \{ (m, \mathit{nextr}(a,r,q), (1, \mathit{success}(a,r,q))) \mid q \in \mathit{resolutions}(m, r, a) \}$$
+
+For any other combination of state and input (all violations of our environment's preconditions), we return the empty set:
+
+$$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq \emptyset$$
+
+## The Robots
+
+For each robot identifier $$i \in \mathbf{n}$$, we write $$\mathit{Robot}_i$$ for the possibilistic system corresponding to robot $$i$$.
+
+We posit the existence of a set $$S_i$$ containing the *mental state* of robot $$i$$. A value of $$S_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$S_i$$ and $$S_j$$ are not required to be equal and are typically distinct.
+
+In addition to mental state, the state of robot $$i$$ also contains *administrative state*. The administrative state $$S_{\mathit{admin}}$$, which is uniform across all robots, synchronizes the robot with the environment and stores stimuli received from the environment.
+
+$$S_{\mathit{admin}} \defeq 1 + (\mathit{BoardState} \times 2)$$
+
+The value $$(0,\ast) \in S_{\mathit{admin}}$$ means that the environment is currently in a $$\mathit{Submit}$$ state. This means that the robots are currently receiving the board state and their succes values. The value $$(1, (m,r,s)) \in S_{\mathit{admin}}$$ means that the environment is currently in a $$\mathit{Receive}$$ state. It stores the wall map $$m$$, robot map $$r$$, and success value $$s$$ transmitted from the environment on the previous step.
+
+Then the state set of robot $$i$$ is defined as:
+
+$$\mathit{State}_{\mathit{Robot}_i} \defeq S_{\mathit{admin}} \times S_i$$
+
+Figure 1 above shows us the input and output sets shared by the $$n$$ robots:
+
+$$\mathit{In}_{\mathit{Robot}_i} \defeq 1 + (\mathit{BoardState} \times 2)$$
+
+$$\mathit{Out}_{\mathit{Robot}_i} \defeq 1 + (\mathit{Act})$$
