@@ -436,12 +436,12 @@ Consulting diagram 9, we see that
 
 $$\mathit{In}_{\mathit{Environment}} \defeq 1 + \mathit{Loc}$$
 
-For $$b \in \mathit{Board}$$, we define $$b[l \mapsto n] \in \mathit{Board}$$ as follows.
+For $$b \in \mathit{Board}$$, we define $$b[\ell \mapsto n] \in \mathit{Board}$$ as follows.
 
 $$
-b[l \mapsto n](k) \defeq \begin{cases}
-b(k) & \text{if } k \neq l \\
-b(n) & \text{if } k = l
+b[\ell \mapsto n](k) \defeq \begin{cases}
+b(k) & \text{if } k \neq \ell \\
+b(n) & \text{if } k = \ell
 \end{cases}
 $$
 
@@ -449,8 +449,8 @@ We define $$\mathit{nextState}_{\mathit{Environment}} : \mathit{In}_{\mathit{Env
 $$~\\$$
 $$\mathit{nextState}_{\mathit{Environment}} : (1 + \mathit{Loc}) \times \mathit{StepType} \times \mathit{Board} \to \mathit{StepType} \times \mathit{Board}$$
 $$
-\mathit{nextState}_{\mathit{Environment}}((1,l), ReceiveFrom(n), b) \defeq \begin{cases}
-(SubmitTo((n+1)~\%~2), b[l \mapsto n]) & \text{if } b(l) = \_ \\
+\mathit{nextState}_{\mathit{Environment}}((1,\ell), ReceiveFrom(n), b) \defeq \begin{cases}
+(SubmitTo((n+1)~\%~2), b[\ell \mapsto n]) & \text{if } b(\ell) = \_ \\
 (SubmitTo((n+1)~\%~2), b) & \text{otherwise}
 \end{cases}
 $$
@@ -550,11 +550,11 @@ $$\vrt{w^\sharp}{w} : \vrt{(1 + \mathit{Board}) \times (1 + \mathit{Board}) \tim
 
 where
 
-$$w(l, b_0, b_1) \defeq \ast$$
+$$w(\ell, b_0, b_1) \defeq \ast$$
 
 and
 
-$$w^\sharp(l, b_0, b_1, \ast) \defeq (b_0, b_1, l)$$
+$$w^\sharp(\ell, b_0, b_1, \ast) \defeq (b_0, b_1, \ell)$$
 
 Or complete system is then equal to:
 
