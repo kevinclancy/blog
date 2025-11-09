@@ -14,7 +14,7 @@ I have experience in C++, Java, Typescript, and Python, and for personal project
 
 ## CertiK
 
-At CertiK, I used Python to develop an abstract interpretation tool on top of the [Slither](https://github.com/crytic/slither) static analyzer for Solidity code. This tool performed both points-to and integer range analyses. The former was used as a basis for taint tracking and many other ad-hoc bug detection tools. The latter was used for detecting integer overflows, division by zero, and unsafe casts. After a year at CertiK, I was promoted to Senior Software Engineer. My deep knowledge of abstract interpretation and order theory made me effective in this role.
+At CertiK, I used Python to develop an abstract interpretation tool on top of the Slither static analyzer for Solidity code. This tool performed both points-to and integer range analyses. The former was used as a basis for taint tracking and many other ad-hoc bug detection tools. The latter was used for detecting integer overflows, division by zero, and unsafe casts. Accoring to activity in CertiK's custom github branch, this tool was used as recently as Summer 2025. After a year at CertiK, I was promoted to Senior Software Engineer. My deep knowledge of abstract interpretation and order theory made me effective in this role.
 
 ## Amazon
 
