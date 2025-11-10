@@ -80,7 +80,7 @@ A dynamical system named $$S$$ can be depicted as follows
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>
-Diagram 1
+Figure 1
 </figcaption>
 </figure>
 
@@ -130,7 +130,7 @@ can be depicted by juxtaposing the two dynamical systems.
   src="/assets/images/gameloop/parallel-product.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 2</figcaption>
+<figcaption>Figure 2</figcaption>
 </figure>
 
 ## Example
@@ -163,7 +163,7 @@ This system represents a wall clock, which takes no internal input and advances 
   src="/assets/images/gameloop/clock.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 3</figcaption>
+<figcaption>Figure 3</figcaption>
 </figure>
 
 Note that we don't need to draw an incoming edge; because the input is $$1 = \{ \ast \}$$, it transmits only one possible value $$\ast$$, and so the location the input comes from is irrelevant.
@@ -207,7 +207,7 @@ $$
   src="/assets/images/gameloop/clock-meridiem.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 4</figcaption>
+<figcaption>Figure 4</figcaption>
 </figure>
 
 To feed the output of $$\mathit{Clock}$$ into $$\mathit{Meridiem}$$, we use composition, which
@@ -218,7 +218,7 @@ can be depicted as nesting.
   src="/assets/images/gameloop/compose-clock.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 5</figcaption>
+<figcaption>Figure 5</figcaption>
 </figure>
 
 The inner dotted box is the parallel product $$\mathit{Clock} \otimes \mathit{Meridiem}$$. The outer dotted box is the fully wired system. The section between the two boxes depicts a new lens
@@ -268,7 +268,7 @@ Such a post-composition is depicted below
   src="/assets/images/gameloop/24-conversion.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 6</figcaption>
+<figcaption>Figure 6</figcaption>
 </figure>
 
 Note that $$f$$ is just a function, not a dynamical system with state.
@@ -312,8 +312,11 @@ While we're add it, let's define another set-theoretic operation.
 
 Now we are ready to formally define the notion of demultiplexor circuits.
 
-> **Definition** The **demultiplexor** $$\mathit{demux}(X, n)$$ is the combinational lens
-> $$\vrt{\pi_1}{f}$$, where $$f : X \times (\mathbf{n + 1}) \to (1 + X)^\mathbf{n}$$ is defined such that
+> **Definition** The **demultiplexor** $$\mathit{demux}(\mathit{In}, X, n)$$ is the combinational lens
+>
+> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{X \times (\mathbf{n + 1})} \leftrightarrows \vrt{\mathit{In}}{(1 + X)^\mathbf{n}}$$
+>
+> where $$f : X \times (\mathbf{n + 1}) \to (1 + X)^\mathbf{n}$$ is defined such that
 >
 > $$
 > f(x, m)(k) \defeq \begin{cases}
@@ -321,13 +324,17 @@ Now we are ready to formally define the notion of demultiplexor circuits.
 > (0,\ast) & \text{ if } m \neq k
 > \end{cases}
 > $$
+>
+> and $$\pi_1 : (X \times (\mathbf{n + 1})) \times \mathit{In} \to \mathit{In}$$ is the second projection function
+>
+> $$\pi_1((x, m), i) \defeq i$$
 
-Thus, the demultiplexor $$\mathit{demux}(X,n)$$ allows us to either
+Thus, the demultiplexor $$\mathit{demux}(\mathit{In}, X,n)$$ allows us to either
 
 * *Select* some $$m \in \mathbf{n}$$ such that $$(1,x)$$ is transmitted along the $$m^{\mathit{th}}$$ output wire and $$(0,\ast)$$ is transmitted along all other output wires.
 * Or, if $$m = n$$, then transmit $$(0,\ast)$$ along all wires.
 
-$$\mathit{demux}(X,n)$$ is depicted below, where we've elided all but the first and last of the $$n$$ output wires.
+$$\mathit{demux}(\mathit{In}, X,n)$$ is depicted below, where we've elided all but the first and last of the $$n$$ output wires.
 
 <figure>
 <img
@@ -337,11 +344,26 @@ $$\mathit{demux}(X,n)$$ is depicted below, where we've elided all but the first 
 <figcaption>Diagram 7</figcaption>
 </figure>
 
+Note that $$\mathit{demux}(\mathit{In}, X, n)$$ can only be post-composed with a dynamical system whose input set is $$\mathit{In}$$. When a demultiplexor is post-composed with a system $$S : \vrt{\mathit{State}_S}{\mathit{State}_S} \leftrightarrows \vrt{\mathit{In}_S}{\mathit{Out}_S}$$, we elide the $$\mathit{In}$$ argument from $$\mathit{demux}$$, instead inferring from context that $$\mathit{In} = \mathit{In}_S$$:
+
+<figure>
+<img
+  src="/assets/images/gameloop/demux-postcompose.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>Figure 8</figcaption>
+</figure>
+
+
 ## Multiplexors
 
 Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at most one input to have the form $$(1, x)$$ while the others have the form $$(0,\ast)$$. We want a combinational lens that produces a single output of type $$1 + X$$, and which forwards $$(1,x)$$ if a single input has the form $$(1,x)$$ and forwards $$(0,x)$$ otherwise.
 
-> **Definition** The **multiplexor** $$\mathit{mux}(X,n)$$ is the combinational lens $$\vrt{\pi_1}{f}$$ where $$f : (1 + X)^\mathbf{n} \to (1 + X)$$ is defined as
+> **Definition** The **multiplexor** $$\mathit{mux}(\mathit{In}, X, n)$$ is the combinational lens
+>
+> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{(1 + X)^\mathbf{n}} \leftrightarrows \vrt{\mathit{In}}{1 + X}$$
+>
+> where $$f : (1 + X)^\mathbf{n} \to (1 + X)$$ is defined as
 >
 > $$
 > f(\phi) \defeq \begin{cases}
@@ -349,13 +371,27 @@ Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at mo
 > (0,\ast) & \text{otherwise}
 > \end{cases}
 > $$
+>
+> and $$\pi_1 : (1 + X)^\mathbf{n} \times \mathit{In} \to \mathit{In}$$ is the second projection function
+>
+> $$\pi_1(\phi, i) \defeq i$$
 
 <figure>
 <img
   src="/assets/images/gameloop/mux.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 8</figcaption>
+<figcaption>Figure 9</figcaption>
+</figure>
+
+Similar to $$\mathit{demux}$$, we typically infer the $$\mathit{In}$$ argument.
+
+<figure>
+<img
+  src="/assets/images/gameloop/mux-postcompose.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>Figure 10</figcaption>
 </figure>
 
 # Tic-tac-toe
@@ -391,7 +427,7 @@ The dynamical system underlying our tic-tac-toe game stepper is then depicted as
   src="/assets/images/gameloop/tictactoe-full.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 9</figcaption>
+<figcaption>Figure 11</figcaption>
 </figure>
 
 It contains three yet undefined stateful subsystems: $$\mathit{Player0}$$, $$\mathit{Player1}$$, and $$\mathit{Environment}$$. Intuitively, the game stepper advances in a periodic pattern consisting of steps of four types, in order:
@@ -417,7 +453,7 @@ Additionally, the state should convey the current board. We've already defined t
 
 $$\mathit{State}_{\mathit{Environment}} \defeq \mathit{StepType} \times \mathit{Board}$$
 
-As diagram 9 shows, the environment's output set is
+As figure 11 shows, the environment's output set is
 
 $$\mathit{Out}_{\mathit{Environment}} \defeq (1 + \mathit{Board}) \times \mathbf{3}$$
 
@@ -432,7 +468,7 @@ $$
 \end{cases}
 $$
 
-Consulting diagram 9, we see that
+Consulting figure 11, we see that
 
 $$\mathit{In}_{\mathit{Environment}} \defeq 1 + \mathit{Loc}$$
 
@@ -477,7 +513,7 @@ $$\mathit{State}_{\mathit{Player0}} \defeq 1 + \mathit{Board}$$
 
 If the player's state is $$(1, b)$$ then it has just received board $$b$$ from the environment and is expected to submit a move on the next turn. Otherwise, the player's state is $$(0,\ast)$$.
 
-We can see from Diagram 9 that
+We can see from Diagram 11 that
 
 $$\mathit{In}_{\mathit{Player0}} \defeq 1 + \mathit{Board}$$
 
@@ -521,7 +557,7 @@ As a first step, we note that our system can be obtained by wiring together the 
   src="/assets/images/gameloop/tictactoe-full-ab.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 10</figcaption>
+<figcaption>Figure 12</figcaption>
 </figure>
 
 Where
@@ -539,7 +575,7 @@ Next, we take their parallel product $$A \otimes B$$, which is depicted below.
   src="/assets/images/gameloop/AB-juxtapose.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 11</figcaption>
+<figcaption>Figure 13</figcaption>
 </figure>
 
 Finally, to close off our system, we must wire together the two components using lens composition, similar to how we wired together the $$\mathit{Clock}$$ and $$\mathit{Meridiem}$$ systems above.
