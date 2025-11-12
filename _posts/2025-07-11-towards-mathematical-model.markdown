@@ -10,9 +10,9 @@ published: true
 
 Many years ago, I worked in the computer game industry as a gameplay programmer. My intuition was that the languages I used, C++ and Lua, were not suitable for gameplay programming.
 
-There were a few reasons for this. First, not only did C++ and Lua lack in-built notions of space and time, but they also lacked general purpose feautures for reasoning about them. For example, I could represent a 3D vector as an object in C++, but the C++ type system had no means to specify which basis (a.k.a. "coordinate system") the vector belonged to, making it easy to perform the invalid operation of adding two vectors belonging to different bases. Second, despite game characters dynamically adjustinging their goals in response to stimulus from their environment, C++ and Lua had no in-built notion of things like imperfect perception and goal setting.
+There were a few reasons for this. First, not only did C++ and Lua lack in-built notions of space and time, but they also lacked general purpose features for reasoning about them. For example, I could represent a 3D vector as an object in C++, but the C++ type system had no means to specify which basis (a.k.a. "coordinate system") the vector belonged to, making it easy to perform the invalid operation of adding two vectors belonging to different bases. Second, despite game characters dynamically adjusting their goals in response to stimulus from their environment, C++ and Lua had no in-built notion of things like imperfect perception and goal setting.
 
-It would be fallacious to claim that the above features are better off built in to a language instead of implemented using general purpose features. In most mainstream langauges, we can implement some sort of state machine system for controlling game characters, where each state represents a distinct goal that a character is persuing. We *could* tag each vector with a basis identifier, and tag each point with its affine frame, dynamically enforcing proper usage at runtime. Perhaps we could even use some sort of indexed type system to enforce proper vector operations statically, though I'm not sure if any mainstream languages are capable of this.
+It would be fallacious to claim that the above features are better off built in to a language instead of implemented using general purpose features. In most mainstream languages, we can implement some sort of state machine system for controlling game characters, where each state represents a distinct goal that a character is pursuing. We *could* tag each vector with a basis identifier, and tag each point with its affine frame, dynamically enforcing proper usage at runtime. Perhaps we could even use some sort of indexed type system to enforce proper vector operations statically, though I'm not sure if any mainstream languages are capable of this.
 
 Nonetheless, I think it's worth experimenting with the design of game specific languages. Even if it turns out that the abstractions of general purpose languages are sufficient for game specific needs, our game specific experimentation may clarify exactly what is needed and how it should be structured.
 
@@ -28,7 +28,7 @@ The first approach has the advantage of being real, while the second approach pr
 
 This post is going to analyze MegaZeux using intuition rather than rigor, trying to isolate the essence of what a MegaZeux game is. It will specifically focus on how multiple simulated agents interact with other agents and the game world, identifying some fundamental features of gameplay programming by exploring a concrete scenario in a MegaZeux game called *Weirdness*.
 
-This primary purpose of this post is to motivate my next few posts, in which I create a mathematical model of a MegaZeux-style computer game. However, it might also be a fun read for people who are interested in computer games and have never heard of MegaZeux, or MegaZeux or gaming fans who want to consider computer games from an analytical perspective.
+The primary purpose of this post is to motivate my next few posts, in which I create a mathematical model of a MegaZeux-style computer game. However, it might also be a fun read for people who are interested in computer games and have never heard of MegaZeux, or MegaZeux or gaming fans who want to consider computer games from an analytical perspective.
 
 ## MegaZeux
 
@@ -36,7 +36,7 @@ This primary purpose of this post is to motivate my next few posts, in which I c
 
 In MegaZeux, scriptable game characters are idosyncratically called *robots*. However, we will often refer to them as agents. Each robot is controlled by a *robotic script*. Because robotic scripting is not the state of the art in game character scripting, I will intentionally avoid discussing it comprehensively. I care about what robotic scripting accomplishes rather than how robotic scripting works.
 
-Here are a few examples of Megazuex games:
+Here are a few examples of MegaZeux games:
 
 <img src="/assets/images/gameloop/mzx-depot-dungeons.png">
 
@@ -54,7 +54,7 @@ A typical game scripting scenario can be found at the beginning of *Weirdness*. 
 
 <img src="/assets/images/gameloop/mzx-weirdness-roy-computer.png">
 
-If the player goes into the basement, he can turn off the fuse box, causing the lights in the house to shut off and destorying Roy's UltraZeux work.
+If the player goes into the basement, he can turn off the fuse box, causing the lights in the house to shut off and destroying Roy's UltraZeux work.
 
 <img src="/assets/images/gameloop/mzx-weirdness-fusebox-off.png">
 
@@ -62,11 +62,11 @@ Roy then walks into the basement and turns the fuse box back on.
 
 <img src="/assets/images/gameloop/mzx-weirdness-fusebox-on.png">
 
-In this scenario, the fuse box itself is a robot. Each robot has a *robotic script*, which is a program pairing several *labels*, which are names of events to respond to, with *handlers*, which are sequences of instructions that the robot should execute in response to these events. When the player attempts to move into the grid cell occupied by the fuse box, the game triggers the fuse box script's "touch" handler, which spawns a dialog asking the player if they want to turn the fuse box off. If they choose "yes" then another handler inside the fuse box's script is executed. This handler sends a "fuse box off" message to Roy. Upon receiving the "fuse box off" message, Roy's robotic script executes its "fuse box off" handler, causing him to expresses his frustration and walk into the basement to turn the fuse box back on.
+In this scenario, the fuse box itself is a robot. Each robot has a *robotic script*, which is a program pairing several *labels*, which are names of events to respond to, with *handlers*, which are sequences of instructions that the robot should execute in response to these events. When the player attempts to move into the grid cell occupied by the fuse box, the game triggers the fuse box script's "touch" handler, which spawns a dialog asking the player if they want to turn the fuse box off. If they choose "yes" then another handler inside the fuse box's script is executed. This handler sends a "fuse box off" message to Roy. Upon receiving the "fuse box off" message, Roy's robotic script executes its "fuse box off" handler, causing him to express his frustration and walk into the basement to turn the fuse box back on.
 
-Let's take a step back and think about what's going on here, using intuition rather than deep analysis. *MegaZeux* is simulating the physical world in a rough manner. The robots in this scenario, Roy and the fuse box, represent physical things in the world. Robotic scripts are an abstraction of the physical things' "brains": both actual brains, as in the case of Roy, and pseudo brains, as in the case of the fuse box. A pseudo brain is a subset of a physical object's characteristics that determine how the object interacts with other objects. But a pseudo brain only includes physical characteristics too fine grained to fall within the scope of the game system, thus requiring custom code; in this sense, a brain is a specific type of pseudo brain. For example, the fuse box occupies a grid cell at a (row,column) location understood by the game system. But the position of the switch *within* the cell is too fine grained and therefore must dealt with using *Weirdness*-specific pseudo brain code, a robotic script.
+Let's take a step back and think about what's going on here, using intuition rather than deep analysis. *MegaZeux* is simulating the physical world in a rough manner. The robots in this scenario, Roy and the fuse box, represent physical things in the world. Robotic scripts are an abstraction of the physical things' "brains": both actual brains, as in the case of Roy, and pseudo brains, as in the case of the fuse box. A pseudo brain is a subset of a physical object's characteristics that determine how the object interacts with other objects. But a pseudo brain only includes physical characteristics too fine grained to fall within the scope of the game system, thus requiring custom code; in this sense, a brain is a specific type of pseudo brain. For example, the fuse box occupies a grid cell at a (row,column) location understood by the game system. But the position of the switch *within* the cell is too fine grained and therefore must be dealt with using *Weirdness*-specific pseudo brain code, a robotic script.
 
-Each handler in a robotic script issues commands instructing its robot to interact with the world in various ways. For example, `go SOUTH` instructs the robot Roy to attempt walking to the grid cell whose $$y$$-coordinate is one greater than Roy's current $$y$$-coordinate. This will only happen if the cell to the south of Roy is currently unoccupied. For this reason, we can view commands such as `go SOUTH` as a message sent from Roy's brain to the physical world, which we will call the *environment*. Upon receiving the message, the environment may or may not choose to move Roy, depending on whether such movement is compatible with its laws of physics, which are *dictated by the environment*. For example, a request by Roy to move into a cell occupied by a wall would be rejected by the environment, because the environment's laws of physics do not a allow a robot and a wall to occupy the same grid cell.
+Each handler in a robotic script issues commands instructing its robot to interact with the world in various ways. For example, `go SOUTH` instructs the robot Roy to attempt walking to the grid cell whose $$y$$-coordinate is one greater than Roy's current $$y$$-coordinate. This will only happen if the cell to the south of Roy is currently unoccupied. For this reason, we can view commands such as `go SOUTH` as a message sent from Roy's brain to the physical world, which we will call the *environment*. Upon receiving the message, the environment may or may not choose to move Roy, depending on whether such movement is compatible with its laws of physics, which are *dictated by the environment*. For example, a request by Roy to move into a cell occupied by a wall would be rejected by the environment, because the environment's laws of physics do not allow a robot and a wall to occupy the same grid cell.
 
 From this discussion, we extract some key features we would like to model.
 * Robots that affect the physical world by making requests to an environment. The environment may or may not honor these requests at its discretion.
@@ -96,7 +96,7 @@ $$\mathit{output} : \mathit{GameState} \to \mathit{Output} $$
 
 and
 
-$$\mathit{nextState} : \mathit{Input} \times \mathit{GameState} \to \mathit{Output}$$
+$$\mathit{nextState} : \mathit{Input} \times \mathit{GameState} \to \mathit{GameState}$$
 
 Such a system is called *open*, because the source of the $$\mathit{Input}$$ wire and the destination of the $$\mathit{Output}$$ wire are left unspecified.
 
@@ -126,7 +126,7 @@ $$\mathit{nextState} : 1 \times \mathit{GameState} \to \mathit{GameState}$$
 
 The idea here is that computing an output in the set $$1$$ is equivalent to not computing an output at all, because choosing an element of a one-element set does not involve making a decision. Likewise an element of $$(\ast, s)$$ of $$1 \times \mathit{GameState}$$ is equivalent to $$s$$ since $$\ast$$ is the only choice for the first component of the pair.
 
-A box doesn't seem very interesting as a diagram. It becomes interesting when we compose it from stateful subcomponents. Each subcomponent is a dynamical system that transforms its current state into output, and also transforms input and an internal state into a next internal state at each point in a sequence a time steps.
+A box doesn't seem very interesting as a diagram. It becomes interesting when we compose it from stateful subcomponents. Each subcomponent is a dynamical system that transforms its current state into output, and also transforms input and an internal state into a next internal state at each point in a sequence of time steps.
 
 What are the stateful subcomponents? As a first approximation, they are
 
