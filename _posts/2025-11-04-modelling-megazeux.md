@@ -22,23 +22,23 @@ This is awkward. It's an arbitrary rule that a game developer needs to learn to 
 
 Our model, unlike MegaZeux, will allow all robots to act at once. The game stepper will evolve in the following fashion. First, it executes the initialization step:
 
-* The environment sends the initial game state to the robots; the game state includes positions of all robots, as well as wall positions.
+* The environment sends the initial game state to the robots; the game state includes positions of all robots, as well as wall positions. The environment sends $$1$$ to each robot telling it that its last action succeeded, even though no such action exists; robots should be programmed to ignore this value. The robots use this information to update their states and store actions ($$\mathit{Idle}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to submit on the next step.
 
-Then, it executes these two steps in a loop:
+Then, it executes steps of these two types in a loop:
 
-1. All robots concurrently use their stored information, received from the environment on the previous step, to update their internal states and send their movement actions ($$\mathit{Idle}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to the environment.
+1. All robots concurrently transmit their stored action, computed on the previous step, to the environment. The robots also clear their stored actions. The environment executes the actions received from the robots to the best of its ability. If a robot proposes moving into a wall, off of the game board, or into a location where another robot currently is, then the move is not executed. If multiple robots attempt to move into the same cell then the environment randomly chooses one to move into the cell, committing the "losers" to their present positions. The environment stores the resulting state of the game board and booleans indicating whether each robot's most recent action succeeded to submit back to the robots on the next step.
 
-2. The Environment executes the actions received from the robots to the best of its ability. If a robot proposes moving into a wall, off of the game board, or into a location where another robot currently is, then the move is not executed. If multiple robots attempt to move into the same cell then the environment randomly chooses one to move into the cell, committing the "losers" to their present positions. The environment sends the resulting state of the game board back to the robots, along with a boolean indicating to each robot whether its move succeeded.
+2. (This is like the initialization step, but now the success values are meaningful.) The environment sends the current game state to the robots; the game state includes positions of all robots, as well as wall positions. The environment also sends to each robot a boolean indicating whether the robot's most recently submitted action succeeded. The robots use this information to update their states and store actions to submit on the next step.
 
 ## Non-deterministic lenses and dynamical systems
 
-According to our plan, when multiple robots attempt moving into the same cell, we randomly choose one to succeed. But this requires a feature beyond the scope of the technique of lenses and dynamical systems described in the previous blog post.
+According to our plan, when multiple robots attempt moving into the same cell, we randomly choose one to succeed. But this requires a feature beyond the scope of the technique of lenses and dynamical systems described in the previous blog post. Namely, non-determinism.
 
-We'll need to extend our definitions so that a dynamical system can update its state non-deterministically. Recall that if $$\mathit{X}$$ is a set then $$P X$$ is the set of all subsets of $$X$$, where $$P -$$ is called the powerset operator. If we think of a set as a collection of possibilities, then what we want is a new formulation of dynamical systems, where the passback function has the type
+We'll need to extend our definitions so that an environment can update its state non-deterministically. Recall that if $$\mathit{X}$$ is a set then $$P X$$ is the set of all subsets of $$X$$, where $$P -$$ is called the powerset operator. If we think of a set as a collection of possibilities, then what we want is a new formulation of dynamical systems, where the passback function has the type
 
 $$\mathit{State} \times \mathit{In} \to P \mathit{State}$$
 
-Instead of producing a successor state as output, it produces the set of all possible successor states. In [Categorical Systems Theory](https://www.davidjaz.com/Papers/DynamicalBook.pdf), this is called a *possibilistic* system. Before we define possibilistic systems, we must first define a possibilistic version of the more general notion of a lens.
+Instead of producing a successor state as output, it produces the set of all possible successor states. In [Categorical Systems Theory](https://www.davidjaz.com/Papers/DynamicalBook.pdf), this is called a *possibilistic* system. Before we define possibilistic systems, we must first define a possibilistic version of lenses.
 
 > **Definition**
 >
@@ -48,7 +48,7 @@ Instead of producing a successor state as output, it produces the set of all pos
 >
 > The arena $$\vrt{A^-}{A^+}$$ is called the **domain** of $$\vrt{f^\sharp}{f}$$ and the arena $$\vrt{B^-}{B^+}$$ is called the **codomain** of $$\vrt{f^\sharp}{f}$$.
 
-Additionally, we have a nondeterminstic notion of dynamical systems.
+Now, we present the nondeterministic notion of dynamical systems.
 
 > **Definition**
 >
@@ -59,24 +59,6 @@ Additionally, we have a nondeterminstic notion of dynamical systems.
 > That is, a dynamical system is a $$P$$-lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
 
 We must also update the definitions of our composition operators.
-
-<!--
-We must also update the definitions of our composition operators. They will make use of a few constructs related to the powerset operator. First, if $$f : X \to Y$$ is a function, then we define a function $$P f : PX \to PY$$ as
-
-$$Pf(A) \defeq \{ f(x) \mid x \in A \}$$
-
-In English, to apply $$Pf$$ to a subset $$A$$ of $$X$$, we apply $$f$$ to every element of $$A$$ and collect the results into a subset of $$Y$$.
-
-There are also a few families of functions that we will need. First, for every set $$X$$ there is a function $$\eta_X : X \to PX$$ which maps an element $$x$$ to the single-element set containing $$x$$:
-
-$$\eta_X(x) \defeq \{ x \}$$
-
-Second, for every set $$X$$ there is a function $$\mu_X : PPX \to PX$$. It takes the union of a set of subsets of $$X$$:
-
-$$\mu_X(Q) \defeq \bigcup Q$$
-
-For example, if $$Q$$ is the set $$\{ A_1, A_2, A_3 \}$$ where each $$A_i$$ is a subset of $$X$$, then $$\mu_X(Q) = A_1 \cup A_2 \cup A_3$$. Now we are ready to define $$P$$-lens composition.
--->
 
 > **Definition**
 >
@@ -120,6 +102,8 @@ The set of board cell locations is then $$\mathbf{w} \times \mathbf{h}$$. Our bo
 
 $$\mathit{BoardState} \defeq \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^\mathbf{n}$$
 
+Elements of the first component $$\mathbf{2}^{\mathbf{w} \times \mathbf{h}}$$ are functions mapping each board cell location to $$0$$ if the cell is vacant and $$1$$ if the cell contains a wall. Elements of the second component $$(\mathbf{w} \times \mathbf{h})^{\mathbf{n}}$$ map each robot identifier $$i$$ to the cell location at which robot $$i$$ is currently located.
+
 Our environment takes steps of two types: receive and send. For send steps, we need to store a mapping from robot identifiers to booleans indicating whether the robot's most recent action succeeded. Thus we define
 
 $$\mathit{StepType} \defeq 1 + \mathbf{2}^{\mathbf{n}}$$
@@ -129,8 +113,6 @@ where the left summand $$1$$ is used for receive steps and the right summand is 
 The state of our environment $$\mathit{Env}$$ is then defined as:
 
 $$\mathit{State}_{\mathit{Env}} \defeq \mathit{BoardState} \times \mathit{StepType}$$
-
-Elements of the first component $$\mathbf{2}^{\mathbf{w} \times \mathbf{h}}$$ are functions mapping each board cell location to $$0$$ if the cell is vacant and $$1$$ if the cell contains a wall. Elements of the second component $$(\mathbf{w} \times \mathbf{h})^{\mathbf{n}}$$ map each robot identifier $$i$$ to the cell location at which robot $$i$$ is currently located.
 
 At each turn, a robot can act by either staying **I**dle or moving in one of the directions **N**orth, **E**ast, **S**outh, or **W**est. Therefore, we define the set of actions as:
 
@@ -150,7 +132,7 @@ The top-down perspective of the MegaZeux game stepper then looks as follows.
 
 <figure>
 <img
-  src="/assets/images/modelling-megazeux/stepper.drawio.png"
+  src="/assets/images/modelling-megazeux/stepper_2.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
 <figcaption>
@@ -158,7 +140,11 @@ Figure 1
 </figcaption>
 </figure>
 
-Note that, unlike the tic-tac-toe game stepper, the MegaZeux stepper has no need for multiplexors and demultiplexors. This is because all robots act simultaneously at each turn.
+To help explain the diagram above, we introduce a notational convenience. Elements of function spaces like $$\mathit{Out}_{\mathit{Env}} = (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$ are functions from robot identifiers (elements of $$\mathbf{n}$$) to output values. We can construct such a function using *lambda notation*: the expression $$\lambda i \in \mathbf{n} . (0, \ast)$$ denotes the constant function that always returns $$(0, \ast)$$ regardless of which robot identifier $$i$$ you pass in. If you're familiar with programming, this is analogous to anonymous functions like Python's `lambda i: (0, star)` or JavaScript's `i => (0, star)`.
+
+The diagram includes two combinational lenses labeled $$\mathit{t2f}$$ and $$\mathit{f2t}$$, which convert between n-ary Cartesian products and function spaces. When the $$n$$ robots are composed in parallel, their collective output is an $$n$$-tuple (an element of the $$n$$-fold Cartesian product), but the environment expects a function from robot identifiers to actions. Similarly, the environment outputs a function mapping each robot to its board state and success value, but the parallel composition of robots expects an $$n$$-tuple. The $$\mathit{t2f}$$ lens converts a tuple $$(v_0, v_1, \ldots, v_{n-1})$$ to the function $$\lambda i \in \mathbf{n} . v_i$$, while $$\mathit{f2t}$$ converts a function $$\phi : \mathbf{n} \to X$$ to the tuple $$(\phi(0), \phi(1), \ldots, \phi(n-1))$$.
+
+Note that, unlike the tic-tac-toe game stepper from the previous post, the MegaZeux stepper has no need for multiplexors and demultiplexors. In tic-tac-toe, the demultiplexor routes the board state to exactly one player per turn (based on whose turn it is), and the multiplexor collects moves from whichever player is active. In MegaZeux, all robots act simultaneously at each turn, so there is no selective routing.
 
 ## The Environment
 
@@ -166,11 +152,9 @@ Now that we've presented the structure of our possibilistic game stepper as a di
 
 $$\vrt{\mathit{nextState}_{\mathit{Env}}}{\mathit{output}_{\mathit{Env}}} : \vrt{\mathit{State}_{\mathit{Env}}}{\mathit{State}_{\mathit{Env}}} \leftrightarrows \vrt{\mathit{In}_{\mathit{Env}}}{\mathit{Out}_{\mathit{Env}}}$$
 
-Before defining the functions, we introduce a notational convenience. Recall that elements of $$\mathit{Out}_{\mathit{Env}} = (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$ are functions from robot identifiers (elements of $$\mathbf{n}$$) to output values. We can construct such a function using *lambda notation*: the expression $$\lambda i \in \mathbf{n} . (0, \ast)$$ denotes the constant function that always returns $$(0, \ast)$$ regardless of which robot identifier $$i$$ you pass in. Similarly, $$\lambda i \in \mathbf{n} . (1, (m, r, s(i)))$$ denotes the function that takes a robot identifier $$i$$ and returns $$(1, (m, r, s(i)))$$, where $$s(i)$$ is the success value for robot $$i$$. If you're familiar with programming, this is analogous to anonymous functions like Python's `lambda i: (0, star)` or JavaScript's `i => (0, star)`.
+The $$\mathit{output}_{\mathit{Env}}$$ function replicates the wall and robot positions to all robots and distributes to each robot the result of its last action:
 
-Now, the $$\mathit{output}_{\mathit{Env}}$$ function replicates the wall and robot positions to all robots and distributes to each robot the result of its last action:
-
-$$\mathit{output}_{\mathit{Env}} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}) \to (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$
+$$\mathit{output}_{\mathit{Env}} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}) \to (1 + \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathbf{2})^{\mathbf{n}}$$
 
 $$\mathit{output}_{\mathit{Env}}(m, r, (0, \ast)) \defeq \lambda i \in \mathbf{n} . (0, \ast)$$
 
@@ -268,7 +252,7 @@ We can now define the Receive step transition in terms of these helper functions
 
 $$\mathit{nextState}_{\mathit{Env}}((m, r, (0, \ast)), a) \defeq \{ (m, \mathit{nextr}(a,r,q), (1, \mathit{success}(a,r,q))) \mid q \in \mathit{resolutions}(m, r, a) \}$$
 
-For any other combination of state and input (all violations of our environment's preconditions), we return the empty set:
+For any other combination of state and input (which--as violations of our environment's preconditions--are never intended to arise), we return the empty set:
 
 $$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq \emptyset$$
 
@@ -276,20 +260,213 @@ $$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq \emptyset$$
 
 For each robot identifier $$i \in \mathbf{n}$$, we write $$\mathit{Robot}_i$$ for the possibilistic system corresponding to robot $$i$$.
 
-We posit the existence of a set $$S_i$$ containing the *mental state* of robot $$i$$. A value of $$S_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$S_i$$ and $$S_j$$ are not required to be equal and are typically distinct.
+We posit the existence of a set $$\Sigma_i$$ containing the *mental state* of robot $$i$$. A value of $$\Sigma_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$\Sigma_i$$ and $$\Sigma_j$$ are not required to be equal and are typically distinct.
 
-In addition to mental state, the state of robot $$i$$ also contains *administrative state*. The administrative state $$S_{\mathit{admin}}$$, which is uniform across all robots, synchronizes the robot with the environment and stores stimuli received from the environment.
+In addition to mental state, the state of robot $$i$$ also contains *administrative state*. The administrative state $$S$$, which is uniform across all robots, synchronizes the robot with the environment and stages actions to transmit to the environment.
 
-$$S_{\mathit{admin}} \defeq 1 + (\mathit{BoardState} \times 2)$$
+$$S \defeq 1 + \mathit{Act}$$
 
-The value $$(0,\ast) \in S_{\mathit{admin}}$$ means that the environment is currently in a $$\mathit{Submit}$$ state. This means that the robots are currently receiving the board state and their succes values. The value $$(1, (m,r,s)) \in S_{\mathit{admin}}$$ means that the environment is currently in a $$\mathit{Receive}$$ state. It stores the wall map $$m$$, robot map $$r$$, and success value $$s$$ transmitted from the environment on the previous step.
+The value $$(0,\ast) \in S$$ means that the environment is currently in a $$\mathit{Submit}$$ state. This means that the robots are currently receiving the board state and their success values. The value $$(1, a) \in S$$ means that the environment is currently in a $$\mathit{Receive}$$ state. The value $$a$$ is the action computed by the robot at the previous step, which has been stored in preparation for transmission at the current step.
 
 Then the state set of robot $$i$$ is defined as:
 
-$$\mathit{State}_{\mathit{Robot}_i} \defeq S_{\mathit{admin}} \times S_i$$
+$$\mathit{State}_{\mathit{Robot}_i} \defeq S \times \Sigma_i$$
 
 Figure 1 above shows us the input and output sets shared by the $$n$$ robots:
 
-$$\mathit{In}_{\mathit{Robot}_i} \defeq 1 + (\mathit{BoardState} \times 2)$$
+$$\mathit{In}_{\mathit{Robot}_i} \defeq 1 + (\mathit{BoardState} \times \mathbf{2})$$
 
-$$\mathit{Out}_{\mathit{Robot}_i} \defeq 1 + (\mathit{Act})$$
+$$\mathit{Out}_{\mathit{Robot}_i} \defeq 1 + \mathit{Act}$$
+
+Note that $$\mathit{Out}_{\mathit{Robot}_i} = S$$.
+
+Now, we must define $$\mathit{Robot}_i$$ as a possibilistic lens:
+
+$$\mathit{Robot}_i : \vrt{\mathit{State}_{\mathit{Robot}_i}}{\mathit{State}_{\mathit{Robot}_i}} \leftrightarrows \vrt{\mathit{In}_{\mathit{Robot}_i}}{\mathit{Out}_{\mathit{Robot}_i}} \defeq \vrt{nextState_{\mathit{Robot}_i}}{\mathit{output}_{\mathit{Robot}_i}}$$
+
+where we define
+
+$$\mathit{output}_{\mathit{Robot}_i} : S \times \Sigma_i \to 1 + \mathit{Act}$$
+
+$$\mathit{output}_{\mathit{Robot}_i}(s, \sigma) \defeq s$$
+
+and
+
+$$\mathit{nextState}_{\mathit{Robot}_i} : S \times \Sigma_i \times (1 + \mathit{BoardState} \times \mathbf{2}) \to P(S \times \Sigma_i)$$
+
+We posit the existence of a function $$\phi_i : \Sigma_i \times \mathit{BoardState} \times \mathbf{2} \to \mathit{Act} \times \Sigma_i$$ which, given robot $$i$$'s mental state, the current board state, and whether its last action succeeded, computes the next action and updates the mental state.
+
+When in the "robot receiving" state $$(0, *)$$, the robot expects board state as input, and uses $$\phi$$ to compute its new state and action.
+
+$$\mathit{nextState}_{\mathit{Robot}_i}((0, \ast), \sigma, (1, (b, s))) \defeq \{((1, a), \sigma')\}$$
+
+$$\text{where } (a, \sigma') = \phi_i(\sigma, b, s)$$
+
+When in the "robot sending" state $$(1, a)$$, the robot expects empty input and transitions back to the "robot receiving" state.
+
+$$\mathit{nextState}_{\mathit{Robot}_i}((1, a), \sigma, (0, \ast)) \defeq \{((0, \ast), \sigma)\}$$
+
+For any other combination of state and input (precondition violations), we return the empty set:
+
+$$\mathit{nextState}_{\mathit{Robot}_i}(z, \sigma, x) \defeq \emptyset$$
+
+## Wiring things up
+
+We now have all the pieces to assemble our game stepper: the environment $$\mathit{Env}$$ and the $$n$$ robots $$\mathit{Robot}_0, \ldots, \mathit{Robot}_{n-1}$$. To create the full system, we need to connect the robots layer to the environment layer using composition.
+
+The robots layer is formed by composing all robots in parallel:
+
+$$\mathit{Robots} \defeq \mathit{Robot}_0 \otimes \mathit{Robot}_1 \otimes \cdots \otimes \mathit{Robot}_{n-1}$$
+
+We convert to the environment's input set by post-composing by the $$\mathit{t2f}$$ combinational lens.
+
+$$A \defeq \mathit{t2f} \circ \mathit{Robots}$$
+
+We convert from the environment's output set to the players' input set by postcomposing with $$\mathit{f2t}$$
+
+$$B \defeq \mathit{f2t} \circ \mathit{Env}$$
+
+The signatures of $$A$$ and $$B$$ are
+
+$$
+A : \vrt{\mathit{State_{\mathit{Robot}_1}} \times \cdots \times \mathit{State}_{\mathit{Robot}_n}}{\mathit{State_{\mathit{Robot}_1}} \times \cdots \times \mathit{State}_{\mathit{Robot}_n}} \leftrightarrows \vrt{(1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2})}{(1 + \mathit{Act})^{\mathbf{n}}}
+$$
+
+and
+
+$$
+B : \vrt{\mathit{State_{\mathit{Env}}}}{\mathit{State}_{\mathit{Env}}} \leftrightarrows \vrt{(1 + \mathit{Act})^{\mathbf{n}}}{(1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2})}
+$$
+
+We juxtapose them with the parallel product:
+
+$$A \otimes B : \vrt{\mathit{State_{\mathit{Robot}_1}} \times \cdots \times \mathit{State}_{\mathit{Robot}_n} \times \mathit{State}_{\mathit{Env}}}{\mathit{State_{\mathit{Robot}_1}} \times \cdots \times \mathit{State}_{\mathit{Robot}_n} \times \mathit{State}_{\mathit{Env}}} \leftrightarrows \vrt{(1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2}) \times (1 + \mathit{Act})^{\mathbf{n}}}{(1 + \mathit{Act})^{\mathbf{n}} \times (1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2})}$$
+
+which is depicted by the following diagram
+
+<figure>
+<img
+  src="/assets/images/modelling-megazeux/ab-juxtapose.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>
+Figure 2
+</figcaption>
+</figure>
+
+We wire $$A$$ and $$B$$ together by post-composing $$A \otimes B$$ with a wiring lens that creates the feedback loop. The wiring lens must take the output of $$A \otimes B$$ (which has $$A$$'s output followed by $$B$$'s output) and route it appropriately: $$B$$'s output should feed into $$A$$'s input, and $$A$$'s output should feed into $$B$$'s input.
+
+$$\vrt{w^\sharp}{w} : \vrt{(1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2}) \times (1 + \mathit{Act})^{\mathbf{n}}}{(1 + \mathit{Act})^{\mathbf{n}} \times (1 + \mathit{BoardState} \times \mathbf{2}) \times \underset{n}{\cdots} \times (1 + \mathit{BoardState} \times \mathbf{2})} \leftrightarrows \vrt{1}{1}$$
+
+where the passforward function $$w$$ is defined as:
+
+$$w(a, b_0, b_1, \ldots, b_{n-1}) \defeq \ast$$
+
+This function simply discards both outputs, as the system is closed (there is no external environment to communicate with).
+
+The passback function $$w^\sharp$$ creates the feedback connections:
+
+$$w^\sharp(a, b_0, b_1, \ldots, b_{n-1}, \ast) \defeq \{(b_0, b_1, \ldots, b_{n-1}, a)\}$$
+
+The complete game stepper is then:
+
+$$\mathit{Stepper} \defeq \vrt{w^\sharp}{w} \circ (A \otimes B)$$
+
+# Conclusion
+
+Now we're getting somewhere. We have a game stepper that almost resembles MegaZeux. Like MegaZeux, it has a varying number of robots driven by distinct scripts. Also like MegaZeux, these robots are located on a 2D grid and move on the grid by submitting requests to an environment. Instead of executing the robot scripts in sequence, our model diverges from MegaZeux by executing the scripts of all robots concurrently at each frame. This more accurately reflects the real world and prevents a game from confusing developers with hidden execution ordering rules.
+
+## Looking Ahead
+
+Recall our original checklist of features:
+
+* ✅ A robot performs physical actions by submitting requests to an environment. The environment decides whether to honor these requests.
+* ✅ A robot has internal state, but it's a purely "mental" state that is used to make decisions. Physical properties of the robot are stored in the environment's internal state.
+* ❌ A robot may send a message to another robot, which represents information sent along some physical communication medium.
+
+We still need to implement the last one. Now that we've extended our dynamical systems formalism to *possibilistic* dynamical systems capable of modelling non-deterministic behavior, robots can process all messages received on the previous frame in any non-deterministically chosen order.
+
+To refresh your memory, here is the sample pseudo-code of robot message passing that I presented in the previous post.
+
+```
+// When the player switches off the fuse box, this channel notifies all subscribers.
+channel fuse_box_off : 1;
+
+robot roy {
+  receives on fuse_box_off;
+
+  state working {
+    handler fuse_box_off (_ : 1) = {
+      set_state(fix_fusebox);
+    }
+  }
+
+  state fix_fusebox {
+    ...
+  }
+}
+
+robot fuse_box {
+  sends on fuse_box_off;
+
+  state on {
+    handler on_player_touch (_ : 1) = {
+      send fuse_box_off(*);
+      set_state(off);
+    }
+  }
+
+  state off {
+    ...
+  }
+}
+```
+
+Diagramatically, each robot $$R$$ appears as a rectangle representing a possibilistic dynamical system. Now, in addition to an input wire transmitting elements of the $$\mathit{GameState}$$ set, the system $$R$$ also has an input wire for each channel that it subscribes to as a receiver. In addition to the output wire transmitting elements of the set $$\mathit{Act}$$ of actions, it also has one output wire for each channel $$R$$ subscribes to as a sender.
+
+So, for example, the $$\mathit{Roy}$$ system has two input wires: one transmits observations of $$\mathit{GameState}$$ sent from the environment, and the other transmits the collection of all messages sent along the $$\mathit{fuse\_box\_off}$$ channel during a single frame. Because $$\mathit{Roy}$$ does not subscribe to any channels as a sender, it has only an $$\mathit{Act}$$ output wire.
+
+<figure>
+<img
+  src="/assets/images/modelling-megazeux/roy-example.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>
+Figure 3
+</figcaption>
+</figure>
+
+And likewise for the $$\mathit{FuseBox}$$ system.
+
+<figure>
+<img
+  src="/assets/images/modelling-megazeux/fuse-box-solo.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>
+Figure 4
+</figcaption>
+</figure>
+
+Now, you might wonder why the channel wires are labelled with $$M_{\mathit{fin}} 1$$ even though the $$\mathit{fuse\_box\_off}$$ channel was declared with type $$1$$. The reason is that $$1$$ is the type of the individual messages that the channel transmits, but the channel may transmit multiple messages from multiple sender robots on the same frame. Because we've decided that distinct messages sent on the same frame are sent "at the same instant" (more precisely, they're sent within such a small interval that determining their order is too fine-grained to fall within the scope of our game system), the channel wire must transmit an unordered collection of messages rather than a single message. Given a set $$X$$, the elements of the set $$P X$$ are unordered collections of the set $$X$$. But in elements of $$P X$$ (subsets of $$X$$), all elements are unique. This is not appropriate for message collections, because multiple robots, or even a single robot, can transmit the same message multiple times along a channel on a single frame. Furthermore, if $$X$$ is an infinite set, say the set $$\mathbb N = \{ 0, 1, 2, \ldots \}$$ of natural numbers, then its subsets can be infinite as well; collections of messages must be finite so that a robot can sequentially process all of them.
+
+> **Definition** Given a set $$X$$, the set $$M_{\text{fin}}X$$ of *finite multisets* of $$X$$ is defined as follows:
+>
+> $$M_{\text{fin}}X \defeq \{ f : X \to \mathbb{N} \mid \text{finite support} \} $$
+>
+> where a function has finite support if $$\{x \in X \mid f(x) > 0\}$$ is finite. A function $$f : X \to \mathbb N$$ represents a multiset where each element $$x \in X$$ appears $$f(x)$$ times.
+
+To leave things off, the following informal diagram demonstrates how message channels are wired together in the game stepper system.
+
+<figure>
+<img
+  src="/assets/images/modelling-megazeux/channel-wiring.drawio.png"
+  style="margin-top: 30px; margin-bottom: 30px"
+>
+<figcaption>
+Figure 5
+</figcaption>
+</figure>
+
+For each channel, all of the sender wires are directed into a combinational lens called $$\mathit{dist}$$. This lens takes the union of the multisets and duplicates this union along each of the wires going into the receivers of the channel. The receivers store the multiset internally, waiting for the next frame to process it and replace it. We'll cover how this works in more detail in a future post
+
