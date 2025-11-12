@@ -452,7 +452,7 @@ Now, you might wonder why the channel wires are labelled with $$M_{\mathit{fin}}
 
 > **Definition** Given a set $$X$$, the set $$M_{\text{fin}}X$$ of *finite multisets* of $$X$$ is defined as follows:
 >
-> $$M_{\text{fin}}X \defeq \{ f : X \to \mathbb{N} \mid \text{finite support} \} $$
+> $$M_{\text{fin}}X \defeq \{ f : X \to \mathbb{N} \mid f \text{ has finite support} \} $$
 >
 > where a function has finite support if $$\{x \in X \mid f(x) > 0\}$$ is finite. A function $$f : X \to \mathbb N$$ represents a multiset where each element $$x \in X$$ appears $$f(x)$$ times.
 
