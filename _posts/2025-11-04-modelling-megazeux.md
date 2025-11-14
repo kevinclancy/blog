@@ -468,5 +468,5 @@ Figure 5
 </figcaption>
 </figure>
 
-For each channel, all of the sender wires are directed into a combinational lens called $$\mathit{dist}$$. This lens takes the union of the multisets and duplicates this union along each of the wires going into the receivers of the channel. The receivers store the multiset internally, waiting for the next frame to process it and replace it. We'll cover how this works in more detail in a future post
+For each channel, all of the sender wires are directed into a combinational lens called $$\mathit{dist}$$. This lens takes the union of the input multisets and duplicates this union along each of the wires going into the receivers of the channel. The receivers store the multiset internally, waiting for the next frame to process it and replace it. We'll cover how this works in more detail in a future post.
 
