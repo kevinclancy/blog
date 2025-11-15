@@ -626,7 +626,6 @@ robot roy {
   receives on fuse_box_off;
 
   state working {
-
     handler fuse_box_off (_ : 1) = {
       set_state(fix_fusebox);
     }
@@ -657,28 +656,14 @@ Our program starts with a list of channel declarations. A channel declaration in
 
 Each robot is implemented as a state machine. A robot definition begins with a list of declarations stating which channels the robot may send and receive upon. Next, the robot defines a list of states. These states can declare *handlers* to provide code that executes when a message is received, and the handlers in turn can issue `send` commands, which broadcast values to all of the subscribers of a channel.
 
-Diagramatically, the dynamical system for such a setup might look something like this.
+If a robot sends a message along a channel, when is the message received by the channel's subscribers? Our answer is that it is received on the next frame. The reason for this is that all robots acting on a frame are assumed to be acting at roughly the same time: times so close together that their difference is considered too fine-grained for our game engine to track.
 
-<figure>
-<img
-  src="/assets/images/gameloop/fuse_box_example.drawio.png"
-  style="margin-top: 30px; margin-bottom: 30px"
->
-<figcaption>Diagram 12</figcaption>
-</figure>
+A game engine may very reasonably execute multiple robot scripts in sequence on a single frame, but having the second robot receive messages sent by the first robot on the same frame is problematic. Not only does it violate our intuition that all robots are executing "at the same time" on a single frame, but it creates a hidden rule where a message sent from one robot to another may or may not arrive until the next frame depending on which robot was processed first.
 
-We've used a new set operation:
+If two robots transmit messages along the same channel on the same frame, which message do the channel's subscribers process first? Since both messages are considered to be sent "at the same time," our game system is too coarse-grained to answer this question. Our model should therefore non-deterministically permit any ordering. However, our current dynamical system formalism doesn't support non-determinism.
 
-> **Definition** Given a set $$X$$, the set $$X^★$$ is defined as the set of possibly empty lists whose elements are drawn from $$X$$:
->
-> $$X^★ \defeq \{ [x_1, \ldots, x_n] \mid \forall i \in 1..n. x_i \in X \} $$
+The next blog post will correct this by extending the formalism with non-deterministic state transitions. It will also present a basic model of MegaZeux where all robots operate concurrently at every frame. We won't have time to model message channels in that post, but by introducing non-determinism into the MegaZeux model, we will establish the foundation needed to add message passing in a subsequent post.
 
-In diagram 12, the ellipse is a *broadcaster*. Each element of a list received on an incoming wire is duplicated across all outgoing wires. This allows multiple robots to receive a single message sent along a channel.
+---
 
-An outstanding issue is deciding when a robot handles messages. Clearly, we do not want to handle messages immediately after they are sent, as that could lead to an infinite loop of sending and receiving messages. Instead, we will preserve the existing round robin turn-based approach, and have each robot handle all of its pending messages at the beginning of its turn.
-
-A robot's behavior then corresponds to a function
-
-$$GameState \times X_1^{★} \times \ldots \times X_n^{★} \to Move \times Y_1^{★} \times \ldots \times Y_m^{★}$$
-
-where $$X_1,\ldots,X_n$$ are the types of the channels the robot receives on and $$Y_1, \ldots, Y_m$$ are the types of the channels the robot sends on. Many issues arise from this, such as which order a robot handles its messages in and how to map between the functions of the above form and robots' dynamical systems. These will be covered in the next post, which I have not yet written.
+**Next:** [Modelling MegaZeux]({% post_url 2025-11-04-modelling-megazeux %})

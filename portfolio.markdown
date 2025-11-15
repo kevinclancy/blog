@@ -4,7 +4,7 @@ title: Kevin Clancy - Software Engineer
 permalink: /portfolio/
 ---
 
-# Summary
+# Kevin Clancy - Software Engineer
 
 I'm a software engineer looking for opportunities in web development, program analysis, IDE development, and compiler development.
 
