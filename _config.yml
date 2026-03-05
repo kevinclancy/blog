@@ -31,6 +31,13 @@ theme: minima
 plugins:
   - jekyll-feed
 
+# Custom navigation menu order
+minima:
+  nav_pages:
+    - modelling-computer-games.md
+    - portfolio.markdown
+    - vidz.markdown
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to

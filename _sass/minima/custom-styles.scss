@@ -6,3 +6,55 @@
   padding-left: 0;
   padding-right: 0;
 }
+
+// Navigation styles
+.site-nav {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.nav-trigger {
+  display: none;
+}
+
+.drawer-container {
+  display: block;
+}
+
+.drawer {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #424242;
+  font-size: 1.1em;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Hide hamburger menu icon on wide screens
+.menu-icon {
+  display: none;
+}
+
+// Mobile responsive
+@media screen and (max-width: 600px) {
+  .menu-icon {
+    display: block;
+    cursor: pointer;
+  }
+
+  .drawer {
+    display: none;
+    flex-direction: column;
+  }
+
+  .nav-trigger:checked ~ .drawer-container .drawer {
+    display: flex;
+  }
+}

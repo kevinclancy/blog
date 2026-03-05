@@ -24,8 +24,21 @@ layout: base
       <h2 class="post-list-heading">{{ page.list_title }}</h2>
     {%- endif -%}
     <ul class="post-list">
+      {%- for series_page in site.pages -%}
+        {%- if series_page.is_series == true -%}
+      <li>
+        <span class="post-meta">Series</span>
+        <h3>
+          <a class="post-link" href="{{ series_page.url | relative_url }}">
+            {{ series_page.title | escape }}
+          </a>
+        </h3>
+      </li>
+        {%- endif -%}
+      {%- endfor -%}
       {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
       {%- for post in posts -%}
+        {%- if post.categories.size == 0 -%}
       <li>
         <span class="post-meta">{{ post.date | date: date_format }}</span>
         <h3>
@@ -37,6 +50,7 @@ layout: base
           {{ post.excerpt }}
         {%- endif -%}
       </li>
+        {%- endif -%}
       {%- endfor -%}
     </ul>
 

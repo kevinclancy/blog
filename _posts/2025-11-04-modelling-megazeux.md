@@ -2,6 +2,7 @@
 layout: post_classic
 title: Modelling MegaZeux
 date: 2025-11-04 09:00 -0700
+categories: [modelling-computer-games]
 published: true
 ---
 
@@ -56,7 +57,7 @@ Now, we present the nondeterministic notion of dynamical systems.
 >
 > $$\vrt{\mathit{nextState}}{\mathit{output}} : \vrt{\mathit{State}}{\mathit{State}} \leftrightarrows \vrt{\mathit{In}}{\mathit{Out}}$$
 >
-> That is, a dynamical system is a $$P$$-lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
+> That is, a possibilistic dynamical system is a $$P$$-lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
 
 We must also update the definitions of our composition operators.
 
