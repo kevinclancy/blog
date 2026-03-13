@@ -3,6 +3,7 @@ layout: post_classic
 title: Modelling Tic-Tac-Toe
 date: 2025-10-18 09:35 -0700
 categories: [modelling-computer-games]
+keywords: categorical systems theory, game engines, math, game development
 published: true
 ---
 

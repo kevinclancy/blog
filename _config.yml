@@ -29,6 +29,7 @@ author: ""
 markdown: kramdown
 theme: minima
 plugins:
+  - jekyll-sitemap
   - jekyll-feed
 
 # Custom navigation menu order

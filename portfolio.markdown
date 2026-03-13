@@ -14,7 +14,7 @@ I have experience in C++, Java, Typescript, and Python, and for personal project
 
 ## CertiK
 
-At CertiK, I used Python to develop an abstract interpretation tool on top of the Slither static analyzer for Solidity code. This tool performed both points-to and integer range analyses. The former was used as a basis for taint tracking and many other ad-hoc bug detection tools. The latter was used for detecting integer overflows, division by zero, and unsafe casts. Accoring to activity in CertiK's custom github branch, this tool was used as recently as Summer 2025. After a year at CertiK, I was promoted to Senior Software Engineer. My deep knowledge of abstract interpretation and order theory made me effective in this role.
+At CertiK, I used Python to develop an abstract interpretation tool on top of the Slither static analyzer for Solidity code. This tool performed both points-to and integer range analyses. The former was used as a basis for taint tracking and many other ad-hoc bug detection tools. The latter was used for detecting integer overflows, division by zero, and unsafe casts. According to activity in CertiK's custom github branch, this tool was used as recently as Summer 2025. After a year at CertiK, I was promoted to Senior Software Engineer. My deep knowledge of abstract interpretation and order theory made me effective in this role.
 
 ## Amazon
 
@@ -34,7 +34,7 @@ I recently created an online message board for discussing jaw fractures, called 
 
 This website, while currently functional, is a work in progress. I plan to continue refining it over the coming months.
 
-This is the first project that I've created using AI-assisted programming tools. In fact, much of the code was written using Claude Code. On one hand, Claude Code has an almost super-human ability to account for complex software contexts while synthesizing new code. It's also fairly good at getting details correct and writing readable, roboust code. Claude Code is a powerful tool that I will continue to use for personal projects in the future.
+This is the first project that I've created using AI-assisted programming tools. In fact, much of the code was written using Claude Code. On one hand, Claude Code has an almost super-human ability to account for complex software contexts while synthesizing new code. It's also fairly good at getting details correct and writing readable, robust code. Claude Code is a powerful tool that I will continue to use for personal projects in the future.
 
 ### "The loop" server ([github](https://github.com/kevinclancy/theloop-backend))
 
@@ -73,14 +73,13 @@ I went through the first 7 chapters of *The Essence of Compilation*, implementin
 
 The garbage collector runtime was provided by the book. (Though I created a similar garbage collector from scratch in the ``Rust-based Maurer Machine'' project.)
 
-#### *Compiler Design: Virtual Machines* by Reinhard Wilhelm and Helmut Seidl ([github](https://github.com/kevinclancy/MaMaCompiler/tree/cbv-variants-modules))
+#### *Compiler Design: Virtual Machines* by Reinhard Wilhelm and Helmut Seidl ([github](https://github.com/kevinclancy/MaMaRust))
 
 **Skills:** Rust, Virtual Machines, Garbage Collection
 
 Having already implemented the [virtual machine for a C-like language](https://github.com/kevinclancy/VirtualMachineCompiler) described in Chapter 2, I implemented the Maurer Machine [virtual machine for an OCaml-like language](https://github.com/kevinclancy/MaMaRust) described in Chapter 3.
 * Higher-order functions
 * Curried Application
-* Mutable reference cells
 * Closures
 * Mutually recursive functions
 * Tuples
@@ -97,7 +96,7 @@ I went beyond the material described in the book, adding the following features:
 
 Before working at Amazon, I worked at a company called Epic Systems, which develops health record software for hospitals. Epic's software is based on the [MUMPS](https://en.wikipedia.org/wiki/MUMPS) database system. Unlike SQL, the MUMPS databse system provides no formal language for specifying database schemas. Therefore, at Epic, schemas are either conveyed informally in a company manual or internal wiki, or they are never defined at all. A formal schema language allows us to automatically generate validation routines, and it prevents common errors such as *coherence* errors where a single value may be interpreted in multiple ways.
 
-Schema Types is an experimental schema system for MUMPS, using type syntax to define the structure of MUMPS databases. It expresses the logical layer of the database using a language similar to the calculus of constructions. It expresses the physical layer using something akin to a standard type system, but which references the logical layer using indexed types. I used F# to create a prototype type-checker and test generation tool for Schema Types.
+Schema Types is an experimental schema system for MUMPS, using type syntax to define the structure of MUMPS databases. It expresses the logical layer of the database using a language similar to the calculus of constructions. It expresses the physical layer using something akin to a standard type system, but which references the logical layer using indexed types. I used F# to create a prototype type-checker and test generation tool.
 
 ## Miscellaneous Projects
 

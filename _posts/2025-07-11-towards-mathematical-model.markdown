@@ -3,6 +3,7 @@ layout: post_classic
 title:  "Towards a Mathematical Model of Computer Games"
 date:   2025-07-11 20:56:48 -0700
 categories: [modelling-computer-games]
+keywords: game engines, mathematical modelling, megazeux, categorical systems theory, game development
 published: true
 ---
 

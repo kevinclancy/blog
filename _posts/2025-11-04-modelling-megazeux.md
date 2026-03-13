@@ -3,6 +3,7 @@ layout: post_classic
 title: Modelling MegaZeux
 date: 2025-11-04 09:00 -0700
 categories: [modelling-computer-games]
+keywords: categorical systems theory, game engine design, MegaZeux, systems theory, game development, math
 published: true
 ---
 
