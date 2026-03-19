@@ -14,9 +14,9 @@ $$\newcommand{pm}{\text{p.m.}}$$
 
 # Overview
 
-This post is a continuation of [Towards a Mathematical Model of Computer Games]({% post_url 2025-07-11-towards-mathematical-model %}). Unlike that post, this one is focused on mathematical rigor rather than motivation. Rather than defining a mathematical model of a MegaZeux game, it pursues the less ambitious goal of defining a mathematical model of tic-tac-toe. The game tic-tac-toe shares some common characteristics with a MegaZeux game.
+This post is a continuation of [Towards a Mathematical Model of Computer Games]({% post_url 2025-07-11-towards-mathematical-model %}). Unlike that post, this one is focused on mathematical rigor rather than motivation. Rather than defining a mathematical model of a MegaZeux game, it pursues the less ambitious goal of defining a mathematical model of tic-tac-toe.
 
-The game involves two players. Each of these players is analogous to a MegaZeux robot, and the game board plays the role of the environment. The players repeatedly make requests to the board to alter its state. The board may or may not honor those requests depending on whether they obey its "laws of physics".
+The game tic-tac-toe shares some common characteristics with a MegaZeux game. It involves two players. Each of these players is analogous to a MegaZeux robot, and the game board is analogous to the MegaZeux environment. The players repeatedly make requests to the board to alter its state. The board may or may not honor these requests depending on whether they obey its "laws of physics".
 
 The two players together with their environment will form a *closed system*, i.e. a set $$\mathit{GameState}$$ with an update function
 
@@ -94,7 +94,7 @@ If the codomain of one lens matches the domain of another then we can compose th
 >
 > Given lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
 > $$\vrt{g^\sharp}{g} : \vrt{B^-}{B^+} \leftrightarrows \vrt{C^-}{C^+}$$ their **composite**
-> $$\vrt{g^\sharp}{g} \circ \vrt{f^{\sharp}}{f}$$ is defined as $$\vrt{h^\sharp}{h}$$, where
+> $$\vrt{g^\sharp}{g} \circ \vrt{f^{\sharp}}{f}$$ is defined as $$\vrt{h^\sharp}{h} : \vrt{A^-}{A^+} \leftrightarrows \vrt{C^-}{C^+}$$, where
 >
 > * $$h$$ is defined as the function composite $$g \circ f$$
 > * $$h^\sharp$$ is defined such that $$h^\sharp(a^+, c^-) \defeq f^\sharp(a^+, g^\sharp(f(a^+), c^-))$$
@@ -106,7 +106,7 @@ We also have a parallel composition operator on lenses.
 > Given two lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
 $$\vrt{g^\sharp}{g} : \vrt{C^-}{C^+} \leftrightarrows \vrt{D^-}{D^+}$$ we define their parallel
 > product
-> $$\vrt{f^\sharp}{f} \otimes \vrt{g^\sharp}{g} : \vrt{A^- \times C^-}{A^+ \times C^+} \leftrightarrows \vrt{B^- \times D^-}{B^+ \times D^+}$$ is defined as the lens
+> $$\vrt{f^\sharp}{f} \otimes \vrt{g^\sharp}{g} : \vrt{A^- \times C^-}{A^+ \times C^+} \leftrightarrows \vrt{B^- \times D^-}{B^+ \times D^+}$$ as the lens
 > $$\vrt{h^\sharp}{h}$$, where
 >
 > $$h(a^+, c^+) \defeq (f(a^+), g(c^+))$$
@@ -127,7 +127,7 @@ their parallel product
 
 $$S \otimes T : \vrt{\mathit{State}_S \times \mathit{State}_T}{\mathit{State}_S \times \mathit{State}_T} \leftrightarrows \vrt{\mathit{In}_S \times \mathit{In}_T}{\mathit{Out}_S \times \mathit{Out}_T}$$
 
-can be depicted by juxtaposing the two dynamical systems.
+can be depicted by juxtaposing the two dynamical systems:
 
 <figure>
 <img
@@ -248,7 +248,7 @@ Suppose that we want to translate the output of the $$\mathit{Clock}'$$ system a
 
 $$\mathit{Hour24} \defeq \{ 0, 1, 2, \ldots, 23 \}$$
 
-We need to "post-compose" a function $$f : \mathit{Hour} \times \am/\pm \to \mathit{Hour24}$$ after
+We must "post-compose" a function $$f : \mathit{Hour} \times \am/\pm \to \mathit{Hour24}$$ after
 the $$\mathit{Clock}'$$ system, where $$f$$ is defined as follows:
 
 $$
@@ -277,7 +277,7 @@ Such a post-composition is depicted below
 
 Note that $$f$$ is just a function, not a dynamical system with state.
 
-In digital logic, a circuit that stores state is known as sequential, whereas a circuit that
+In digital logic, a circuit that stores state is called sequential, whereas a circuit that
 merely computes a function is called combinational. The function $$f$$ above, having no internal state, is combinational. We can post-compose a dynamical system by a combinational system using lens combination.
 
 Without loss of generality, let $$\mathit{Out}_0 \defeq \mathit{Hour} \times \am/\pm$$, let
@@ -294,12 +294,13 @@ $$\mathit{MilitaryClock} \defeq \vrt{\pi_1}{f} \circ \mathit{Clock'}$$
 
 ## Demultiplexors
 
-Imagine a turn-based board game with multiple players. At each turn, we want to provide exactly one player with the state of the board so that they can make an informed move. The challenge is to send a payload value along a different wire depending on some selector value, and to send "nothing" along all other wires. More precisely, we need a combinational circuit, called a *demultiplexor*, that takes two inputs
+Imagine a turn-based board game with multiple players. At each turn, we want to provide exactly one player with the state of the board so that they can make an informed move. The challenge is to send a payload value along a different wire depending on some selector value, and to send "nothing" along all other wires. More precisely, we need a combinational circuit, called a *demultiplexor*, that takes two inputs. Letting each bold natural number $$\mathbf{n}$$ denote the set of natural numbers less than it, i.e.
+$$\mathbf{n} \defeq \{ 0, 1, \ldots, n-1 \}$$, these inputs are:
 
 * The *payload*, whose type $$\mathit{Payload}$$ may vary
 * The *selector* of type **n + 1**, deciding which, if any, of $$n$$ output destinations to transmit the payload to
 
-The demultiplexor circuit has $$n$$ different output wires. Their type is not quite $$\mathit{Payload}$$; each wire may contain a value of type $$\mathit{Payload}$$ or, if it has not been selected, it may contain "no information" of type $$1$$.
+The demultiplexor circuit has $$n$$ different output wires. Their type is not quite $$\mathit{Payload}$$; each wire may contain a value of type $$\mathit{Payload}$$ or, if it has not been selected, it may contain a $$\ast$$ of type $$1$$.
 
 To express the set of values that each belong to exactly one of the disjoint sets $$\mathit{Payload}$$ or $$1$$ we need to use a set theoretic operation called the *sum*, which is not as well known as its evil twin the Cartesian product.
 
@@ -307,7 +308,7 @@ To express the set of values that each belong to exactly one of the disjoint set
 >
 > $$X + Y \defeq \{ (0,x) \mid x \in X \} \cup \{ (1,y) \mid y \in Y \}$$
 
-By tagging values with either $$0$$ or $$1$$, we ensure that the elements of the two operands are treated as mutually exclusive. It may be instructive to compare the set $$1 = 1 \cup 1$$ with the set $$1 + 1$$.
+By tagging values with either $$0$$ or $$1$$, we ensure that the elements of the two operands are treated as mutually exclusive; it may be instructive to compare the set $$1 = 1 \cup 1$$ with the set $$1 + 1$$. Each of a demultiplexor's output wires then has type $$\mathit{Payload} + 1$$.
 
 While we're at it, let's define another set-theoretic operation.
 
@@ -316,7 +317,7 @@ While we're at it, let's define another set-theoretic operation.
 
 Now we are ready to formally define the notion of demultiplexor circuits.
 
-> **Definition** The **demultiplexor** $$\mathit{demux}(\mathit{In}, X, n)$$ is the combinational lens
+> **Definition** Let $$\mathit{In}$$ and $$X$$ be sets, and let $$n$$ be a natural number. The **demultiplexor** $$\mathit{demux}(\mathit{In}, X, n)$$ is the combinational lens
 >
 > $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{X \times (\mathbf{n + 1})} \leftrightarrows \vrt{\mathit{In}}{(1 + X)^\mathbf{n}}$$
 >
@@ -405,9 +406,8 @@ We do not model any notion of a winning condition, but instead focus on the evol
 
 ## Overview
 
-To model the board, we first need a notion of cell locations. Let each bold natural number
-$$\mathbf{n}$$ denote the set of natural numbers less than it, i.e.
-$$\mathbf{n} \defeq \{ 0, 1, \ldots, n-1 \}$$. A location on a tic-tac-toe board consists of an
+To model the board, we first need a notion of cell locations. Recall that each bold natural number
+$$\mathbf{n}$$ denotes the set of natural numbers less than it. A location on a tic-tac-toe board consists of an
 x-coordinate and a y-coordinate, so we define the set $$\mathit{Loc}$$ of locations as
 
 $$\mathit{Loc} \defeq \mathbf{3} \times \mathbf{3}$$
