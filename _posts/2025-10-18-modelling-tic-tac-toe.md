@@ -466,9 +466,12 @@ $$\mathit{output}_\mathit{Environment} : \mathit{StepType} \times \mathit{Board}
 $$
 \mathit{output}_\mathit{Environment}(t, b) \defeq \begin{cases}
 ((1, b), n) & \text{ if } t = SubmitTo(n) \\
-((0, \ast), 2) & \text{ if } t = ReceiveFrom(n)
+((0, \ast), 2) & \text{ if } t = ReceiveFrom(n) \\
+((0, \ast), 2) & \text{ if } t = IllegalState
 \end{cases}
 $$
+
+The top two cases above are self explanatory. But when our environment is in the $$\mathit{IllegalState}$$ step type, it's not clear what to produce as output. Because really we never intend to enter $$\mathit{IllegalState}$$ to begin with, it ultimately doesn't matter what we choose to output while in $$\mathit{IllegalState}$$; nonetheless, we must provide *some* output so that our function is fully defined. This is an awkward distraction which we will resolve in a future post.
 
 Consulting figure 11, we see that
 
