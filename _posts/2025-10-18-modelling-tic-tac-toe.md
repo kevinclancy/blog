@@ -310,23 +310,21 @@ To express the set of values that each belong to exactly one of the disjoint set
 
 By tagging values with either $$0$$ or $$1$$, we ensure that the elements of the two operands are treated as mutually exclusive; it may be instructive to compare the set $$1 = 1 \cup 1$$ with the set $$1 + 1$$. Each of a demultiplexor's output wires then has type $$\mathit{Payload} + 1$$.
 
-While we're at it, let's define another set-theoretic operation.
-
-> **Definition** Given sets $$X$$ and $$Y$$, $$X^Y$$ is defined as the set of functions from $$Y$$
-> to $$X$$. In other words, $$X^Y$$ is a synonym for $$Y \to X$$.
-
-Now we are ready to formally define the notion of demultiplexor circuits.
+Recall that, if $$X$$ is a set, then $$X \times \overset{n}{\cdots} \times X$$ is the set of $$n$$-ary tuples $$(x_0, \ldots, x_{n-1})$$. We are now ready to formally define the notion of demultiplexor circuits.
 
 > **Definition** Let $$\mathit{In}$$ and $$X$$ be sets, and let $$n$$ be a natural number. The **demultiplexor** $$\mathit{demux}(\mathit{In}, X, n)$$ is the combinational lens
 >
-> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{X \times (\mathbf{n + 1})} \leftrightarrows \vrt{\mathit{In}}{(1 + X)^\mathbf{n}}$$
+> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{X \times (\mathbf{n + 1})} \leftrightarrows \vrt{\mathit{In}}{(1 + X) \times \overset{n}{\cdots} \times (1 + X)}$$
 >
-> where $$f : X \times (\mathbf{n + 1}) \to (1 + X)^\mathbf{n}$$ is defined such that
+> where $$f : X \times (\mathbf{n + 1}) \to (1 + X) \times \overset{n}{\cdots} (1 + X)$$ is defined such that
 >
 > $$
-> f(x, m)(k) \defeq \begin{cases}
-> (1,x) & \text{ if } m = k \\
-> (0,\ast) & \text{ if } m \neq k
+> f(x, m) \defeq (t_0, \ldots, t_{n-1}) \\
+>
+> \text{ where } t_i =
+> \begin{cases}
+> (1,x) & \text{ if } m = i \\
+> (0,\ast) & \text{ if } m \neq i
 > \end{cases}
 > $$
 >
@@ -366,20 +364,20 @@ Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at mo
 
 > **Definition** The **multiplexor** $$\mathit{mux}(\mathit{In}, X, n)$$ is the combinational lens
 >
-> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{(1 + X)^\mathbf{n}} \leftrightarrows \vrt{\mathit{In}}{1 + X}$$
+> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{(1 + X) \times \overset{n}{\cdots} (1 + X)} \leftrightarrows \vrt{\mathit{In}}{1 + X}$$
 >
-> where $$f : (1 + X)^\mathbf{n} \to (1 + X)$$ is defined as
+> where $$f : (1 + X) \times \overset{n}{\cdots} \times (1 + X) \to (1 + X)$$ is defined as
 >
 > $$
-> f(\phi) \defeq \begin{cases}
-> \phi(m) & \text{if there exists a unique } m \in \mathbf{n} \text{ such that } \phi(m) = (1, x) \text{ for some } x \\
+> f(t_0, \ldots, t_{n-1}) \defeq \begin{cases}
+> t_i & \text{if there exists a unique } i \in \mathbf{n} \text{ such that } t_i = (1, x) \text{ for some } x \\
 > (0,\ast) & \text{otherwise}
 > \end{cases}
 > $$
 >
-> and $$\pi_1 : (1 + X)^\mathbf{n} \times \mathit{In} \to \mathit{In}$$ is the second projection function
+> and $$\pi_1 : ((1 + X) \times \overset{n}{\cdots} \times (1 + x)) \times \mathit{In} \to \mathit{In}$$ is the second projection function
 >
-> $$\pi_1(\phi, i) \defeq i$$
+> $$\pi_1((t_0, \ldots, t_{n-1}), i) \defeq i$$
 
 <figure>
 <img
@@ -422,7 +420,7 @@ $$\mathit{Sym} \defeq \{ 0, 1, \_ \} $$
 
 The state of the board is then the set of functions from locations to symbols. We thus define the set of possible board states $$\mathit{Board}$$ as
 
-$$\mathit{Board} \defeq \mathit{Sym}^\mathit{Loc}$$
+$$\mathit{Board} \defeq \mathit{Loc} \to \mathit{Sym}$$
 
 The dynamical system underlying our tic-tac-toe game stepper is then depicted as follows:
 
@@ -485,22 +483,25 @@ n & \text{if } k = \ell
 \end{cases}
 $$
 
-We define $$\mathit{nextState}_{\mathit{Environment}} : \mathit{In}_{\mathit{Environment}} \times \mathit{State}_{\mathit{Environment}} \to \mathit{State}_{\mathit{Environment}}$$ as
+We define $$\mathit{nextState}_{\mathit{Environment}} : \mathit{State}_{\mathit{Environment}} \times \mathit{In}_{\mathit{Environment}} \to \mathit{State}_{\mathit{Environment}}$$ as
 $$~\\$$
-$$\mathit{nextState}_{\mathit{Environment}} : (1 + \mathit{Loc}) \times \mathit{StepType} \times \mathit{Board} \to \mathit{StepType} \times \mathit{Board}$$
+$$\mathit{nextState}_{\mathit{Environment}} : \mathit{StepType} \times \mathit{Board} \times (1 + \mathit{Loc}) \to \mathit{StepType} \times \mathit{Board}$$
+$$~\\$$
 $$
-\mathit{nextState}_{\mathit{Environment}}((1,\ell), ReceiveFrom(n), b) \defeq \begin{cases}
+\mathit{nextState}_{\mathit{Environment}}(ReceiveFrom(n), b, (1,\ell)) \defeq \begin{cases}
 (SubmitTo((n+1)~\%~2), b[\ell \mapsto n]) & \text{if } b(\ell) = \_ \\
 (SubmitTo((n+1)~\%~2), b) & \text{otherwise}
 \end{cases}
 $$
+$$~\\$$
 $$
-\mathit{nextState}_{\mathit{Environment}}((0,\ast), SubmitTo(n), b) \defeq (ReceiveFrom(n), b)
+\mathit{nextState}_{\mathit{Environment}}(SubmitTo(n), b, (0,\ast)) \defeq (ReceiveFrom(n), b)
 $$
-
-and for any other $$(z,s,b) \in (1 + Loc) \times \mathit{StepType} \times Board$$ we define
+$$~\\$$
+$$\text{and for any other } (s,b,z) \in \mathit{StepType} \times Board \times (1 + Loc) \text{ we define}$$
+$$~\\$$
 $$
-\mathit{nextState}_{\mathit{Environment}}(z,s,b) \defeq (\mathit{IllegalState}, b)
+\mathit{nextState}_{\mathit{Environment}}(s,b,z) \defeq (\mathit{IllegalState}, b)
 $$
 
 Finally, we define
@@ -511,7 +512,7 @@ $$\mathit{Environment} : \vrt{\mathit{State}_{\mathit{Environment}}}{\mathit{Sta
 
 We define $$\mathit{Player0}$$, eliding $$\mathit{Player1}$$ as it is essentialy the same.
 
-The state of the player systems can be used for two purposes. First, the state must record a $$Board$$ whenever it is received from the environment. That way the player can use the board to compute a move on the next turn. Second, and optionally, a player's state can serve as its brain by storing information about plan or strategy that the player is currently executing, or by storing an inferred mental model of the opposing player. We will keep things simple and decide moves in a stateless fashion, using only the current state of the board. Hence, we define
+The state of the player systems can be used for two purposes. First, the state must record a $$Board$$ whenever it is received from the environment. That way the player can use the board to compute a move on the next turn. Second, and optionally, a player's state can serve as its "brain" by storing information about a plan or strategy that the player is currently executing, or by storing an inferred mental model of the opposing player. We will keep things simple and decide moves in a stateless fashion, using only the current state of the board. Hence, we define
 
 $$\mathit{State}_{\mathit{Player0}} \defeq 1 + \mathit{Board}$$
 
@@ -539,11 +540,11 @@ $$
 and
 
 $$
-\mathit{nextState}_{\mathit{Player0}}((1, b), x) \defeq (1, b)
+\mathit{nextState}_{\mathit{Player0}}(x, (1, b)) \defeq (1, b)
 $$
 
 $$
-\mathit{nextState}_{\mathit{Player0}}((0, \ast), x) \defeq (0, \ast)
+\mathit{nextState}_{\mathit{Player0}}(x, (0, \ast)) \defeq (0, \ast)
 $$
 
 The $$\mathit{Player0}$$ dynamical system is then defined as
@@ -604,9 +605,9 @@ $$\vrt{w^\sharp}{w} \circ (A \otimes B)$$
 
 ## Evaluating the Dynamical Systems Formalism
 
-It's worth taking a step back to ask whether the lens-based dynamical systems formalism is an appropriate tool for modelling turn-based computer games. The ability of lenses to represent cyclic data flow, from the players to the environment and back to the players, is essential. Additionally, lens based dynamical systems make it easy for us to encapsulate data, restricting a players to mutate only their own mental state, and restricting the environment to only mutate the physical world.
+It's worth taking a step back to ask whether the lens-based dynamical systems formalism is an appropriate tool for modelling turn-based computer games. The ability of lenses to represent cyclic data flow, from the players to the environment and back to the players, is essential. Additionally, lens based dynamical systems make it easy for us to encapsulate data, restricting players to mutate only their own mental state, and restricting the environment to only mutate the physical world.
 
-One drawback is that, due to the inherently concurrent nature of lens-based dynamical systems, we've needed to insert machinery for synchronization, which has little to do with dynamics of our turn-based games. For example, giving most wires the type $$1 + X$$ is a distraction.
+One drawback is that, due to the inherently concurrent nature of lens-based dynamical systems, we've needed to insert machinery for synchronization which has little to do with dynamics of our turn-based games. For example, giving most wires the type $$1 + X$$ instead of $$X$$ is a distraction, but a necessary one in this formalism.
 
 ## Looking ahead
 
@@ -616,7 +617,7 @@ Now that we've developed a mathematical model of a game stepper for tic-tac-toe,
 * ✅ A robot has internal state, but it's a purely "mental" state that is used to make decisions. Physical properties of the robot are stored in the environment's internal state.
 * ❌ A robot may send a message to another robot, which represents information sent along some physical communication medium.
 
-Our model implements the first two features. The game board can be seen as the environment, which encapsulates all physical information, namely the contents of every cell on the game board. A player can be seen as a robot; by virtue of being a dynamical systems, it encapsulates its own private data, i.e. mental state.
+Our model implements the first two features. The game board can be seen as the environment, which encapsulates all physical information, namely the contents of every cell on the game board. A player can be seen as a robot; by virtue of being a dynamical system, it encapsulates its own private data, i.e. mental state.
 
 The last feature, message passing among robots, is not present in the model I described. Speculating, in a game's source code, message passing might look similar to the following pseudo-code.
 
