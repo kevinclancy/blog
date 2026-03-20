@@ -199,7 +199,7 @@ f^\sharp(\pm,h) \defeq \begin{cases}
 \end{cases}
 $$
 
-Now we need "wire together" the $$\mathit{Clock}$$ and $$\mathit{Meridiem}$$ systems. As a first step, we take their paralell product.
+Now we need to "wire together" the $$\mathit{Clock}$$ and $$\mathit{Meridiem}$$ systems. As a first step, we take their parallel product.
 
 $$
 \mathit{Clock} \otimes \mathit{Meridiem} :
@@ -316,7 +316,7 @@ Recall that, if $$X$$ is a set, then $$X \times \overset{n}{\cdots} \times X$$ i
 >
 > $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{X \times (\mathbf{n + 1})} \leftrightarrows \vrt{\mathit{In}}{(1 + X) \times \overset{n}{\cdots} \times (1 + X)}$$
 >
-> where $$f : X \times (\mathbf{n + 1}) \to (1 + X) \times \overset{n}{\cdots} (1 + X)$$ is defined such that
+> where $$f : X \times (\mathbf{n + 1}) \to (1 + X) \times \overset{n}{\cdots} \times (1 + X)$$ is defined such that
 >
 > $$
 > f(x, m) \defeq (t_0, \ldots, t_{n-1}) \\
@@ -344,7 +344,7 @@ $$\mathit{demux}(\mathit{In}, X,n)$$ is depicted below, where we've elided all b
   src="/assets/images/gameloop/demux.drawio.png"
   style="margin-top: 30px; margin-bottom: 30px"
 >
-<figcaption>Diagram 7</figcaption>
+<figcaption>Figure 7</figcaption>
 </figure>
 
 Note that $$\mathit{demux}(\mathit{In}, X, n)$$ can only be post-composed with a dynamical system whose input set is $$\mathit{In}$$. When a demultiplexor is post-composed with a system $$S : \vrt{\mathit{State}_S}{\mathit{State}_S} \leftrightarrows \vrt{\mathit{In}_S}{\mathit{Out}_S}$$, we elide the $$\mathit{In}$$ argument from $$\mathit{demux}$$, instead inferring from context that $$\mathit{In} = \mathit{In}_S$$:
@@ -360,11 +360,11 @@ Note that $$\mathit{demux}(\mathit{In}, X, n)$$ can only be post-composed with a
 
 ## Multiplexors
 
-Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at most one input to have the form $$(1, x)$$ while the others have the form $$(0,\ast)$$. We want a combinational lens that produces a single output of type $$1 + X$$, and which forwards $$(1,x)$$ if a single input has the form $$(1,x)$$ and forwards $$(0,x)$$ otherwise.
+Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at most one input to have the form $$(1, x)$$ while the others have the form $$(0,\ast)$$. We want a combinational lens that produces a single output of type $$1 + X$$, and which forwards $$(1,x)$$ if a single input has the form $$(1,x)$$ and forwards $$(0,\ast)$$ otherwise.
 
 > **Definition** The **multiplexor** $$\mathit{mux}(\mathit{In}, X, n)$$ is the combinational lens
 >
-> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{(1 + X) \times \overset{n}{\cdots} (1 + X)} \leftrightarrows \vrt{\mathit{In}}{1 + X}$$
+> $$\vrt{\pi_1}{f} : \vrt{\mathit{In}}{(1 + X) \times \overset{n}{\cdots} \times (1 + X)} \leftrightarrows \vrt{\mathit{In}}{1 + X}$$
 >
 > where $$f : (1 + X) \times \overset{n}{\cdots} \times (1 + X) \to (1 + X)$$ is defined as
 >
@@ -375,7 +375,7 @@ Assume $$n$$ inputs of type $$(1 + X)$$, and further assume that we expect at mo
 > \end{cases}
 > $$
 >
-> and $$\pi_1 : ((1 + X) \times \overset{n}{\cdots} \times (1 + x)) \times \mathit{In} \to \mathit{In}$$ is the second projection function
+> and $$\pi_1 : ((1 + X) \times \overset{n}{\cdots} \times (1 + X)) \times \mathit{In} \to \mathit{In}$$ is the second projection function
 >
 > $$\pi_1((t_0, \ldots, t_{n-1}), i) \defeq i$$
 
@@ -510,7 +510,7 @@ $$\mathit{Environment} : \vrt{\mathit{State}_{\mathit{Environment}}}{\mathit{Sta
 
 ## Players
 
-We define $$\mathit{Player0}$$, eliding $$\mathit{Player1}$$ as it is essentialy the same.
+We define $$\mathit{Player0}$$, eliding $$\mathit{Player1}$$ as it is essentially the same.
 
 The state of the player systems can be used for two purposes. First, the state must record a $$Board$$ whenever it is received from the environment. That way the player can use the board to compute a move on the next turn. Second, and optionally, a player's state can serve as its "brain" by storing information about a plan or strategy that the player is currently executing, or by storing an inferred mental model of the opposing player. We will keep things simple and decide moves in a stateless fashion, using only the current state of the board. Hence, we define
 
@@ -518,7 +518,7 @@ $$\mathit{State}_{\mathit{Player0}} \defeq 1 + \mathit{Board}$$
 
 If the player's state is $$(1, b)$$ then it has just received board $$b$$ from the environment and is expected to submit a move on the next turn. Otherwise, the player's state is $$(0,\ast)$$.
 
-We can see from Diagram 11 that
+We can see from Figure 11 that
 
 $$\mathit{In}_{\mathit{Player0}} \defeq 1 + \mathit{Board}$$
 
