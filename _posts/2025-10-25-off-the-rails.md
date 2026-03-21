@@ -67,7 +67,24 @@ The interesting part is the definition of $$\mathit{nextState}$$. Unlike the $$\
 
 Note the asymmetry in the "type signature" of $$\mathit{nextState}$$: a sum appears on the right side but not the left. This is because once a precondition has been violated, we choose not to continue executing our system. Defining the system's response to receiving input while in an illegal state would only distract and confuse.
 
-We now provide the final component of our partial systems theory: parallel composition.
+We now provide the remaining components of our partial systems theory: standard composition and parallel composition.
+
+> **Definition**
+>
+> Given partial lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
+> $$\vrt{g^\sharp}{g} : \vrt{B^-}{B^+} \leftrightarrows \vrt{C^-}{C^+}$$ their **composite**
+> $$\vrt{g^\sharp}{g} \circ \vrt{f^{\sharp}}{f}$$ is defined as $$\vrt{h^\sharp}{h} : \vrt{A^-}{A^+} \leftrightarrows \vrt{C^-}{C^+}$$, where
+>
+> * $$h$$ is defined as the function composite $$g \circ f$$
+> * $$h^\sharp$$ is defined such that $$h^\sharp(a^+, c^-) \defeq \begin{cases}
+> (0, \ast) & \text{if } g^\sharp(f(a^+), c^-) = (0, \ast) \\
+> (0, \ast) & \text{if } g^\sharp(f(a^+), c^-) = (1, b^-) \text{ and } f^\sharp(a^+, b^-) = (0, \ast) \\
+> (1, a^-) & \text{if } g^\sharp(f(a^+), c^-) = (1, b^-) \text{ and } f^\sharp(a^+, b^-) = (1, a^-)
+> \end{cases}$$
+
+Intuitively, the above definition says that if either the inner or the outer lens signals a precondition violation during passback, then the composite lens signals a precondition violation as well.
+
+Next, we define parallel composition.
 
 > **Definition**
 >
