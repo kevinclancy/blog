@@ -612,64 +612,10 @@ It's worth taking a step back to ask whether the lens-based dynamical systems fo
 
 One drawback is that, due to the inherently concurrent nature of lens-based dynamical systems, we've needed to insert machinery for synchronization which has little to do with dynamics of our turn-based games. For example, giving most wires the type $$1 + X$$ instead of $$X$$ is a distraction, but a necessary one in this formalism.
 
-## Looking ahead
+## Looking Ahead
 
-Now that we've developed a mathematical model of a game stepper for tic-tac-toe, let's recall the significant features listed at the end of my [previous post]({% post_url 2025-07-11-towards-mathematical-model %}) and consider how well the model implements these features.
-
-* ✅ A robot performs physical actions by submitting requests to an environment. The environment decides whether to honor these requests.
-* ✅ A robot has internal state, but it's a purely "mental" state that is used to make decisions. Physical properties of the robot are stored in the environment's internal state.
-* ❌ A robot may send a message to another robot, which represents information sent along some physical communication medium.
-
-Our model implements the first two features. The game board can be seen as the environment, which encapsulates all physical information, namely the contents of every cell on the game board. A player can be seen as a robot; by virtue of being a dynamical system, it encapsulates its own private data, i.e. mental state.
-
-The last feature, message passing among robots, is not present in the model I described. Speculating, in a game's source code, message passing might look similar to the following pseudo-code.
-
-```
-// When the player switches off the fuse box, this channel notifies all subscribers.
-channel fuse_box_off : 1;
-
-robot roy {
-  receives on fuse_box_off;
-
-  state working {
-    handler fuse_box_off (_ : 1) = {
-      set_state(fix_fusebox);
-    }
-  }
-
-  state fix_fusebox {
-    ...
-  }
-}
-
-robot fuse_box {
-  sends on fuse_box_off;
-
-  state on {
-    handler on_player_touch (_ : 1) = {
-      send fuse_box_off(*);
-      set_state(off);
-    }
-  }
-
-  state off {
-    ...
-  }
-}
-```
-
-Our program starts with a list of channel declarations. A channel declaration includes both a name and the type of messages sent along the channel. In this example, our channel is named `fuse_box_off` and has type $$1$$, where $$1$$ is the type of containing a single information-free value $$\ast$$.
-
-Each robot is implemented as a state machine. A robot definition begins with a list of declarations stating which channels the robot may send and receive upon. Next, the robot defines a list of states. These states can declare *handlers* to provide code that executes when a message is received, and the handlers in turn can issue `send` commands, which broadcast values to all of the subscribers of a channel.
-
-If a robot sends a message along a channel, when is the message received by the channel's subscribers? Our answer is that it is received on the next frame. The reason for this is that all robots acting on a frame are assumed to be acting at roughly the same time: times so close together that their difference is considered too fine-grained for our game engine to track.
-
-A game engine may very reasonably execute multiple robot scripts in sequence on a single frame, but having the second robot receive messages sent by the first robot on the same frame is problematic. Not only does it violate our intuition that all robots are executing "at the same time" on a single frame, but it creates a hidden rule where a message sent from one robot to another may or may not arrive until the next frame depending on which robot was processed first.
-
-If two robots transmit messages along the same channel on the same frame, which message do the channel's subscribers process first? Since both messages are considered to be sent "at the same time," our game system is too coarse-grained to answer this question. Our model should therefore non-deterministically permit any ordering. However, our current dynamical system formalism doesn't support non-determinism.
-
-The next blog post will correct this by extending the formalism with non-deterministic state transitions. It will also present a basic model of MegaZeux where all robots operate concurrently at every frame. We won't have time to model message channels in that post, but by introducing non-determinism into the MegaZeux model, we will establish the foundation needed to add message passing in a subsequent post.
+Recall that defining $$\mathit{nextState}_\mathit{Environment}$$ required us to handle the awkward $$\mathit{IllegalState}$$ case — a state that our system should never actually reach. In the next post, we'll address this by introducing *partial lenses* and *partial dynamical systems*, which let us formally distinguish between expected and unexpected behavior without cluttering our definitions.
 
 ---
 
-**Next:** [Modelling MegaZeux]({% post_url 2025-11-04-modelling-megazeux %})
+**Next:** [Partial Systems]({% post_url 2025-10-25-partial-systems %})
