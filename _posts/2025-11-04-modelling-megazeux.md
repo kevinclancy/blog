@@ -20,11 +20,11 @@ In tic-tac-toe, players take turns making moves. But MegaZeux is a simulation of
 
 As it turns out, MegaZeux does *not* faithfully reflect the concurrent nature of the real world. Robots execute in a turn-based manner every frame. The order that the robots execute in is decided by their position on the grid. It starts in the top-left corner, updating every robot it encounters as it moves right across the top row. Then it iterates across the second row, then the third, until it reaches the bottom-right corner of the game board.
 
-This is awkward. It's an arbitrary rule that a game developer needs to learn to explain the behavior of MegaZeux games. Consider two side-by-side robots. If both attempt walking one cell to the left on the same frame then both robots move. However, if both walk one cell to the right then only the right robot moves, because when the left robot walks right, it crashes into the right robot.
+This is awkward. It's an arbitrary rule that a game developer needs to learn to explain the behavior of MegaZeux games. Consider two side-by-side robots. If both attempt walking one cell to the left on the same frame then both robots move. However, if both walk one cell to the right then only the right robot moves, because when the left robot walks right, it crashes into the right robot. This counter-intuitive asymmetry should be eliminated.
 
 Our model, unlike MegaZeux, will allow all robots to act at once. The game stepper will evolve in the following fashion. First, it executes the initialization step:
 
-* The environment sends the initial game state to the robots; the game state includes positions of all robots, as well as wall positions. The environment sends $$1$$ to each robot telling it that its last action succeeded, even though no such action exists; robots should be programmed to ignore this value. The robots use this information to update their states and store actions ($$\mathit{Idle}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to submit on the next step.
+* The environment sends the initial game state to the robots; the game state includes positions of all robots, as well as wall positions. The environment sends $$1$$ to each robot telling it that its last action succeeded, even though no such action exists; robots should be programmed to ignore this value. The robots use the received positional information to update their states and store actions ($$\mathit{Idle}$$, $$\mathit{North}$$, $$\mathit{East}$$, $$\mathit{South}$$, $$\mathit{West}$$) to submit on the next step.
 
 Then, it executes steps of these two types in a loop:
 
@@ -34,19 +34,27 @@ Then, it executes steps of these two types in a loop:
 
 ## Non-deterministic lenses and dynamical systems
 
-According to our plan, when multiple robots attempt moving into the same cell, we randomly choose one to succeed. But this requires a feature beyond the scope of the technique of lenses and dynamical systems described in the previous blog post. Namely, non-determinism.
+According to our plan, when multiple robots attempt moving into the same cell, we randomly choose one to succeed. But this requires a feature beyond the scope of the technique of partial lenses and dynamical systems described in the previous post: non-determinism.
 
-We'll need to extend our definitions so that an environment can update its state non-deterministically. Recall that if $$\mathit{X}$$ is a set then $$P X$$ is the set of all subsets of $$X$$, where $$P -$$ is called the powerset operator. If we think of a set as a collection of possibilities, then what we want is a new formulation of dynamical systems, where the passback function has the type
+We'll need to extend our definitions so that an environment can update its state non-deterministically. Recall that if $$\mathit{X}$$ is a set then $$P X$$ is the set of all subsets of $$X$$, where $$P$$ is called the powerset operator. We define the variant $$P_+$$ of the powerset operator such that for all sets $$X$$,
 
-$$\mathit{State} \times \mathit{In} \to P \mathit{State}$$
+$$P_+ X \defeq \{ A \mid A \text{ is non-empty subset of X} \}$$
 
-Instead of producing a successor state as output, it produces the set of all possible successor states. In [Categorical Systems Theory](https://www.davidjaz.com/Papers/DynamicalBook.pdf), this is called a *possibilistic* system. Before we define possibilistic systems, we must first define a possibilistic version of lenses.
+If we think of a set as a collection of possibilities, then what we want is a new formulation of dynamical systems, where the passback function has the type
+
+$$\mathit{State} \times \mathit{In} \to 1 + P_+ \mathit{State}$$
+
+As before, state/input pairs that violate our systems precondition produce a "left injection" $$(0, \ast)$$.
+
+But if a state/input pair satisfies our system's precondition, then instead of producing a successor state as output, it produces the set of all possible successor states. In [Categorical Systems Theory](https://www.davidjaz.com/Papers/DynamicalBook.pdf), systems which allow multiple possible successor states are called *possibilistic* systems. We define systems which are both partial and have multiple possible successors, called *partial possibilistic systems*.
+
+Before we define partial possibilistic systems, we must first define a partial possibilistic version of lenses.
 
 > **Definition**
 >
-> A **$$P$$-lens** $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ is a pair consisting of two functions:
+> A **$$T$$-lens** $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ is a pair consisting of two functions:
 > * A passforward function $$f : A^+ \to B^+$$
-> * A passback function $$f^\sharp : A^+ \times B^- \to P A^-$$
+> * A passback function $$f^\sharp : A^+ \times B^- \to 1 + P_+ A^-$$
 >
 > The arena $$\vrt{A^-}{A^+}$$ is called the **domain** of $$\vrt{f^\sharp}{f}$$ and the arena $$\vrt{B^-}{B^+}$$ is called the **codomain** of $$\vrt{f^\sharp}{f}$$.
 
@@ -54,40 +62,47 @@ Now, we present the nondeterministic notion of dynamical systems.
 
 > **Definition**
 >
-> A **possibilistic dynamical system** is a $$P$$-lens of the form
+> A **partial possibilistic dynamical system** is a $$T$$-lens of the form
 >
 > $$\vrt{\mathit{nextState}}{\mathit{output}} : \vrt{\mathit{State}}{\mathit{State}} \leftrightarrows \vrt{\mathit{In}}{\mathit{Out}}$$
 >
-> That is, a possibilistic dynamical system is a $$P$$-lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
+> That is, a partial possibilistic dynamical system is a $$T$$-lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
 
 We must also update the definitions of our composition operators.
 
 > **Definition**
 >
-> Given $$P$$-lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
+> Given $$T$$-lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
 > $$\vrt{g^\sharp}{g} : \vrt{B^-}{B^+} \leftrightarrows \vrt{C^-}{C^+}$$ their **composite**
-> $$\vrt{g^\sharp}{g} \circ \vrt{f^{\sharp}}{f}$$ is defined as $$\vrt{h^\sharp}{h}$$, where
+> $$\vrt{g^\sharp}{g} \circ \vrt{f^{\sharp}}{f}$$ is defined as $$\vrt{h^\sharp}{h} : \vrt{A^-}{A^+} \leftrightarrows \vrt{C^-}{C^+}$$, where
 >
 > * $$h$$ is defined as the function composite $$g \circ f$$
 > * $$h^\sharp$$ is defined such that
 >
->$$h^\sharp(a^+, c^-) \defeq \bigcup_{b^-~\in~g^\sharp(f(a^+), c^-)} f^\sharp(a^+, b^-)$$
+> $$h^\sharp(a^+, c^-) \defeq \begin{cases}
+> (0, \ast) & \text{if } g^\sharp(f(a^+), c^-) = (0, \ast) \\
+> (0, \ast) & \text{if } g^\sharp(f(a^+), c^-) = (1, S) \text{ and } f^\sharp(a^+, b^-) = (0, \ast) \text{ for some } b^- \in S \\
+> (1, \bigcup_{b^- \in S} S_{b^-}) & \text{if } g^\sharp(f(a^+), c^-) = (1, S) \text{ and } f^\sharp(a^+, b^-) = (1, S_{b^-}) \text{ for all } b^- \in S
+> \end{cases}$$
 
 We must also update our parallel composition operator.
 
 > **Definition**
 >
-> Given two lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
-$$\vrt{g^\sharp}{g} : \vrt{C^-}{C^+} \leftrightarrows \vrt{D^-}{D^+}$$ we define their parallel
+> Given two $$T$$-lenses $$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$ and
+> $$\vrt{g^\sharp}{g} : \vrt{C^-}{C^+} \leftrightarrows \vrt{D^-}{D^+}$$ we define their parallel
 > product
-> $$\vrt{f^\sharp}{f} \otimes \vrt{g^\sharp}{g} : \vrt{A^- \times C^-}{A^+ \times C^+} \leftrightarrows \vrt{B^- \times D^-}{B^+ \times D^+}$$ is defined as the lens
+> $$\vrt{f^\sharp}{f} \otimes \vrt{g^\sharp}{g} : \vrt{A^- \times C^-}{A^+ \times C^+} \leftrightarrows \vrt{B^- \times D^-}{B^+ \times D^+}$$ as the $$T$$-lens
 > $$\vrt{h^\sharp}{h}$$, where
 >
 > $$h(a^+, c^+) \defeq (f(a^+), g(c^+))$$
 >
 > and
 >
-> $$h^\sharp(a^+, c^+, b^-, d^-) \defeq \{ (a^-, c^-) \mid a^- \in f^\sharp(a^+, b^-),~c^- \in g^\sharp(c^+, d^-) \}$$
+> $$h^\sharp(a^+, c^+, b^-, d^-) \defeq \begin{cases}
+> (0, \ast) & \text{if } f^\sharp(a^+, b^-) = (0, \ast) \text{ or } g^\sharp(c^+, d^-) = (0, \ast) \\
+> (1, \{ (a^-, c^-) \mid a^- \in S_f,~c^- \in S_g \}) & \text{if } f^\sharp(a^+, b^-) = (1, S_f) \text{ and } g^\sharp(c^+, d^-) = (1, S_g)
+> \end{cases}$$
 
 # The Model
 
@@ -126,7 +141,7 @@ $$\mathit{In}_{\mathit{Env}} \defeq (1 + \mathit{Act})^{\mathbf{n}}$$
 
 Since the robots only submit actions at every other step, we also include the summand $$1$$ in the definition of $$\mathit{In}_{\mathit{Env}}$$ to use on turns where the robots do not submit.
 
-On every $$\mathit{Send}$$ step, the environment must output to each robot a copy of the game state along with a boolean (an element of $$\mathbf{2}$$) indicating whether or not the robot's most recently submitted action succeeded.
+On every $$\mathit{Send}$$ step, the environment must output to each robot a copy of the board state along with a boolean (an element of $$\mathbf{2}$$) indicating whether or not the robot's most recently submitted action succeeded.
 
 $$\mathit{Out}_{\mathit{Env}} \defeq (1 + \mathit{BoardState} \times \mathbf{2})^{\mathbf{n}}$$
 
@@ -150,7 +165,7 @@ Note that, unlike the tic-tac-toe game stepper from the previous post, the MegaZ
 
 ## The Environment
 
-Now that we've presented the structure of our possibilistic game stepper as a diagram, let's define the subsystem $$\mathit{Env}$$. It is defined as the possibilistic system
+Now that we've presented the structure of our possibilistic game stepper as a diagram, let's define the subsystem $$\mathit{Env}$$. It is defined as the partial possibilistic system
 
 $$\vrt{\mathit{nextState}_{\mathit{Env}}}{\mathit{output}_{\mathit{Env}}} : \vrt{\mathit{State}_{\mathit{Env}}}{\mathit{State}_{\mathit{Env}}} \leftrightarrows \vrt{\mathit{In}_{\mathit{Env}}}{\mathit{Out}_{\mathit{Env}}}$$
 
@@ -164,11 +179,11 @@ $$\mathit{output}_{\mathit{Env}}(m, r, (1, s)) \defeq \lambda i \in \mathbf{n} .
 
 The $$\mathit{nextState}_{\mathit{Env}}$$ passback function has type:
 
-$$\mathit{nextState}_{\mathit{Env}} : \mathit{State}_{\mathit{Env}} \times \mathit{In}_{\mathit{Env}} \to P\mathit{State}_{\mathit{Env}}$$
+$$\mathit{nextState}_{\mathit{Env}} : \mathit{State}_{\mathit{Env}} \times \mathit{In}_{\mathit{Env}} \to 1 + P_+\mathit{State}_{\mathit{Env}}$$
 
 Expanding the definitions:
 
-$$\mathit{nextState}_{\mathit{Env}} : (\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}})) \times (1 + \mathit{Act})^{\mathbf{n}} \to P(\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}))$$
+$$\mathit{nextState}_{\mathit{Env}} : (\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}})) \times (1 + \mathit{Act})^{\mathbf{n}} \to 1 + P_+(\mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times (1 + \mathbf{2}^{\mathbf{n}}))$$
 
 We need a few helper functions. First, given a robot position map $$r$$ and an action $$a \in \mathit{Act}$$, we define $$\mathit{move}(r, i, a)$$ to compute the proposed new position for robot $$i$$:
 
@@ -191,15 +206,15 @@ $$\mathit{valid} : \mathbf{2}^{\mathbf{w} \times \mathbf{h}} \times (\mathbf{w} 
 $$\mathit{valid}(m, r, i, a) \defeq \begin{cases}
 \mathit{true} & \text{if } \mathit{move}(r,i,a) \in \mathbf{w} \times \mathbf{h} \\
 & \land~m(\mathit{move}(r,i,a)) = 0 \\
-& \land~\mathit{move}(r,i,a) \notin \{r(j) \mid j \in \mathbf{n}\} \\
+& \land~\mathit{move}(r,i,a) \notin \{r(j) \mid j \in \mathbf{n},~j \neq i\} \\
 \mathit{false} & \text{otherwise}
 \end{cases}$$
 
 Now we can define $$\mathit{nextState}_{\mathit{Env}}$$. On a Send step in which the environment's preconditions are satisfied (i.e., all robots provide no input), we transition back to Receive:
 
-$$\mathit{nextState}_{\mathit{Env}}((m, r, (1, s)), \lambda i \in \mathbf{n} . (0, \ast)) \defeq \{(m, r, (0, \ast))\}$$
+$$\mathit{nextState}_{\mathit{Env}}((m, r, (1, s)), \lambda i \in \mathbf{n} . (0, \ast)) \defeq (1, \{(m, r, (0, \ast))\})$$
 
-On a Receive step where the environment's preconditions are satisified (i.e., all robots provide an action), we process the robot actions and non-deterministically resolve conflicts. Let $$a \in (1 + \mathit{Act})^{\mathbf{n}}$$ be the input, where $$a(i) = (1, \alpha_i)$$ for all $$i \in \mathbf{n}$$ and some action $$\alpha_i$$.
+On a Receive step where the environment's preconditions are satisfied (i.e., all robots provide an action), we process the robot actions and non-deterministically resolve conflicts. Let $$a \in (1 + \mathit{Act})^{\mathbf{n}}$$ be the input, where $$a(i) = (1, \alpha_i)$$ for all $$i \in \mathbf{n}$$ and some action $$\alpha_i$$.
 
 For each cell location $$\ell \in \mathbf{w} \times \mathbf{h}$$, let $$\mathit{candidates}(\ell, m, r, a)$$ denote the set of robots attempting to move to $$\ell$$:
 
@@ -252,17 +267,17 @@ $$\mathit{success}(a,r,q)(i) \defeq \begin{cases}
 
 We can now define the Receive step transition in terms of these helper functions:
 
-$$\mathit{nextState}_{\mathit{Env}}((m, r, (0, \ast)), a) \defeq \{ (m, \mathit{nextr}(a,r,q), (1, \mathit{success}(a,r,q))) \mid q \in \mathit{resolutions}(m, r, a) \}$$
+$$\mathit{nextState}_{\mathit{Env}}((m, r, (0, \ast)), a) \defeq (1, \{ (m, \mathit{nextr}(a,r,q), (1, \mathit{success}(a,r,q))) \mid q \in \mathit{resolutions}(m, r, a) \})$$
 
-For any other combination of state and input (which--as violations of our environment's preconditions--are never intended to arise), we return the empty set:
+Any other combination of state and input violates our environment's precondition:
 
-$$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq \emptyset$$
+$$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq (0, \ast)$$
 
 ## The Robots
 
-For each robot identifier $$i \in \mathbf{n}$$, we write $$\mathit{Robot}_i$$ for the possibilistic system corresponding to robot $$i$$.
+For each robot identifier $$i \in \mathbf{n}$$, we write $$\mathit{Robot}_i$$ for the partial possibilistic system corresponding to robot $$i$$.
 
-We posit the existence of a set $$\Sigma_i$$ containing the *mental state* of robot $$i$$. A value of $$\Sigma_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$\Sigma_i$$ and $$\Sigma_j$$ are not required to be equal and are typically distinct.
+We posit the existence of a set $$\Sigma_i$$ containing the *mental state* of robot $$i$$. An element of $$\Sigma_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$\Sigma_i$$ and $$\Sigma_j$$ are not required to be equal and are typically distinct.
 
 In addition to mental state, the state of robot $$i$$ also contains *administrative state*. The administrative state $$S$$, which is uniform across all robots, synchronizes the robot with the environment and stages actions to transmit to the environment.
 
@@ -270,7 +285,7 @@ $$S \defeq 1 + \mathit{Act}$$
 
 The value $$(0,\ast) \in S$$ means that the environment is currently in a $$\mathit{Submit}$$ state. This means that the robots are currently receiving the board state and their success values. The value $$(1, a) \in S$$ means that the environment is currently in a $$\mathit{Receive}$$ state. The value $$a$$ is the action computed by the robot at the previous step, which has been stored in preparation for transmission at the current step.
 
-Then the state set of robot $$i$$ is defined as:
+The state set of robot $$i$$ is then defined as:
 
 $$\mathit{State}_{\mathit{Robot}_i} \defeq S \times \Sigma_i$$
 
@@ -282,7 +297,7 @@ $$\mathit{Out}_{\mathit{Robot}_i} \defeq 1 + \mathit{Act}$$
 
 Note that $$\mathit{Out}_{\mathit{Robot}_i} = S$$.
 
-Now, we must define $$\mathit{Robot}_i$$ as a possibilistic lens:
+Now, we must define $$\mathit{Robot}_i$$ as a partial possibilistic lens:
 
 $$\mathit{Robot}_i : \vrt{\mathit{State}_{\mathit{Robot}_i}}{\mathit{State}_{\mathit{Robot}_i}} \leftrightarrows \vrt{\mathit{In}_{\mathit{Robot}_i}}{\mathit{Out}_{\mathit{Robot}_i}} \defeq \vrt{nextState_{\mathit{Robot}_i}}{\mathit{output}_{\mathit{Robot}_i}}$$
 
@@ -292,25 +307,25 @@ $$\mathit{output}_{\mathit{Robot}_i} : S \times \Sigma_i \to 1 + \mathit{Act}$$
 
 $$\mathit{output}_{\mathit{Robot}_i}(s, \sigma) \defeq s$$
 
-and
+and for
 
-$$\mathit{nextState}_{\mathit{Robot}_i} : S \times \Sigma_i \times (1 + \mathit{BoardState} \times \mathbf{2}) \to P(S \times \Sigma_i)$$
+$$\mathit{nextState}_{\mathit{Robot}_i} : S \times \Sigma_i \times (1 + \mathit{BoardState} \times \mathbf{2}) \to 1 + P_+(S \times \Sigma_i)$$
 
-We posit the existence of a function $$\phi_i : \Sigma_i \times \mathit{BoardState} \times \mathbf{2} \to \mathit{Act} \times \Sigma_i$$ which, given robot $$i$$'s mental state, the current board state, and whether its last action succeeded, computes the next action and updates the mental state.
+we posit the existence of a function $$\phi_i : \Sigma_i \times \mathit{BoardState} \times \mathbf{2} \to \mathit{Act} \times \Sigma_i$$ which, given robot $$i$$'s mental state, the current board state, and whether its last action succeeded, computes the next action and updates the mental state.
 
 When in the "robot receiving" state $$(0, *)$$, the robot expects board state as input, and uses $$\phi$$ to compute its new state and action.
 
-$$\mathit{nextState}_{\mathit{Robot}_i}((0, \ast), \sigma, (1, (b, s))) \defeq \{((1, a), \sigma')\}$$
+$$\mathit{nextState}_{\mathit{Robot}_i}((0, \ast), \sigma, (1, (b, s))) \defeq (1, \{((1, a), \sigma')\})$$
 
 $$\text{where } (a, \sigma') = \phi_i(\sigma, b, s)$$
 
 When in the "robot sending" state $$(1, a)$$, the robot expects empty input and transitions back to the "robot receiving" state.
 
-$$\mathit{nextState}_{\mathit{Robot}_i}((1, a), \sigma, (0, \ast)) \defeq \{((0, \ast), \sigma)\}$$
+$$\mathit{nextState}_{\mathit{Robot}_i}((1, a), \sigma, (0, \ast)) \defeq (1, \{((0, \ast), \sigma)\})$$
 
-For any other combination of state and input (precondition violations), we return the empty set:
+Any other combination of state and input is a precondition violation:
 
-$$\mathit{nextState}_{\mathit{Robot}_i}(z, \sigma, x) \defeq \emptyset$$
+$$\mathit{nextState}_{\mathit{Robot}_i}(z, \sigma, x) \defeq (0, \ast)$$
 
 ## Wiring things up
 
@@ -368,7 +383,7 @@ This function simply discards both outputs, as the system is closed (there is no
 
 The passback function $$w^\sharp$$ creates the feedback connections:
 
-$$w^\sharp(a, b_0, b_1, \ldots, b_{n-1}, \ast) \defeq \{(b_0, b_1, \ldots, b_{n-1}, a)\}$$
+$$w^\sharp(a, b_0, b_1, \ldots, b_{n-1}, \ast) \defeq (1, \{(b_0, b_1, \ldots, b_{n-1}, a)\})$$
 
 The complete game stepper is then:
 
