@@ -26,21 +26,15 @@ I'm almost always working on programming projects to improve my software enginee
 
 ## Web Development
 
-### Brokenjaw.net message board ([github](github.com/kevinclancy/kboard))
+### Brokenjaw.net message board ([github](https://github.com/kevinclancy/kboard))
 
 **Skills:** React, Rust, Typescript, HTML, CSS, Loco, SQLite, Docker, Github Actions, AWS, S3, Terraform, Claude Code
 
-I recently created an online message board for discussing jaw fractures, called [BrokenJaw.net](https://brokenjaw.net). This site uses the Rust-based backend framework Loco and the SQLite database system. Its frontend is written in Typescript and uses the React framework. I studied up on HTML, CSS, and React while developing this site, though the AI generated frontend code doesn't keep a clean separation of logical HTML layout and visual CSS styling, opting instead for inline styling. It uses github actions to build, test, and deploy docker containers to an AWS EC2 instance each time code is pushed to its github repo.
+I recently created an online message board for discussing jaw fractures, called [BrokenJaw.net](https://brokenjaw.net). This site uses the Rust-based backend framework Loco and the SQLite database system. Its frontend is written in Typescript and uses the React framework. I studied HTML, CSS, and React while developing this site, though the AI-generated frontend code doesn't keep a clean separation of logical HTML layout and visual CSS styling, opting instead for inline styling. It uses Github Actions to build, test, and deploy docker containers to an AWS EC2 instance each time code is pushed to its github repo.
 
 This website, while currently functional, is a work in progress. I plan to continue refining it over the coming months.
 
 This is the first project that I've created using AI-assisted programming tools. In fact, much of the code was written using Claude Code. On one hand, Claude Code has an almost super-human ability to account for complex software contexts while synthesizing new code. It's also fairly good at getting details correct and writing readable, robust code. Claude Code is a powerful tool that I will continue to use for personal projects in the future.
-
-### "The loop" server ([github](https://github.com/kevinclancy/theloop-backend))
-
-**Skills:** OCaml, Dream, LWT, PostgreSQL
-
-The loop server is a process that responds to http requests by reading to and writing from a PostgreSQL database. It was written in OCaml using the Dream web framework. Its behavior is partially documented in its [integration test](https://github.com/kevinclancy/theloop-backend/blob/main/test/test_theloop.ml), though this test needs to be extended with more detail. I was considering making Facebook Groups style website using this as the backend, but then decided to abandon it.
 
 ## Languages and Compilers
 
@@ -57,21 +51,6 @@ The following video is a bit tedious. I don't recommend watching the whole thing
 <iframe width="420" height="315" src="https://www.youtube.com/embed/Ls3Z3xyKTC8" frameborder="0" allowfullscreen></iframe>
 
 ### Compilers and VMs
-
-#### *The Essence of Compilation* by Jeremy Siek ([github](https://github.com/kevinclancy/EssentialsOfCompilation))
-
-**Skills:** Compilers, Racket, x86 Assembly, Dataflow Analysis
-
-I went through the first 7 chapters of *The Essence of Compilation*, implementing a Lisp-to-x86 compiler in Racket, which includes:
-* Imperative variables
-* Loops
-* Dataflow based liveness analysis
-* Register allocation
-* Dynamically-allocated Tuples
-* A Two-Space Copying Garbage Collector
-* Function definitions, function calls, and tail calls
-
-The garbage collector runtime was provided by the book. (Though I created a similar garbage collector from scratch in the ``Rust-based Maurer Machine'' project.)
 
 #### *Compiler Design: Virtual Machines* by Reinhard Wilhelm and Helmut Seidl ([github](https://github.com/kevinclancy/MaMaRust))
 
@@ -90,23 +69,24 @@ I went beyond the material described in the book, adding the following features:
 * Algebraic datatypes, pattern matching, and match expressions with 'when' clauses
 * A two-space copying garbage collector
 
-### Schema Types - NoSQL Database Schema Language ([github](https://github.com/kevinclancy/SchemaTypes))
+#### Pliron Contributions [github](https://github.com/pliron-org/pliron)
+
+In 2026, I started contributing to a multi-level compilation framework called Pliron. It can best be thought of as a MLIR clone written in Rust. Multi-level compilation provides common infrastructure for pass management, rewriting, and verification across multiple IR lowering phases with different levels of abstraction. This project was conceived and implemented primarily by [vaivaswatha](https://github.com/vaivaswatha); it's been extremely helpful to learn from someone with far more Rust and compilers expertise than I have.
+
+So far, I have contributed the following to pliron:
+* [Dominator tree computations](https://github.com/pliron-org/pliron/pull/87)
+* [Sparse Conditional Constant Propagation](https://github.com/pliron-org/pliron/pull/111)
+* [CFG Simplification](https://github.com/pliron-org/pliron/pull/117)
+
+### Miscellaneous Projects
+
+#### Schema Types - NoSQL Database Schema Language ([github](https://github.com/kevinclancy/SchemaTypes))
 
 **Skills:** F#, Type Systems, Database Schemas, MUMPS
 
-Before working at Amazon, I worked at a company called Epic Systems, which develops health record software for hospitals. Epic's software is based on the [MUMPS](https://en.wikipedia.org/wiki/MUMPS) database system. Unlike SQL, the MUMPS databse system provides no formal language for specifying database schemas. Therefore, at Epic, schemas are either conveyed informally in a company manual or internal wiki, or they are never defined at all. A formal schema language allows us to automatically generate validation routines, and it prevents common errors such as *coherence* errors where a single value may be interpreted in multiple ways.
+Before working at Amazon, I worked at a company called Epic Systems, which develops health record software for hospitals. Epic's software is based on the [MUMPS](https://en.wikipedia.org/wiki/MUMPS) database system. Unlike SQL, MUMPS provides no formal language for specifying database schemas. Therefore, at Epic, schemas are either conveyed informally in a company manual or internal wiki, or they are never defined. A formal schema language allows us to automatically generate validation routines, and it prevents common errors such as *coherence* errors where a single value may be interpreted in multiple ways.
 
 Schema Types is an experimental schema system for MUMPS, using type syntax to define the structure of MUMPS databases. It expresses the logical layer of the database using a language similar to the calculus of constructions. It expresses the physical layer using something akin to a standard type system, but which references the logical layer using indexed types. I used F# to create a prototype type-checker and test generation tool.
-
-## Miscellaneous Projects
-
-#### Ray Tracing in One Weekend ([github](https://github.com/kevinclancy/raytracing-rust))
-
-**Skills:** Rust, Linear Algebra, 3D Math
-
-After reading the Rust book, I wanted to undertake a simple project that would give me a feel for writing my own Rust programs. I decided to implement the project described by Steve Hollasch's free online book "Ray Tracing in One Weekend". I didn't quite complete the book, getting only through chapter 7. This was a great opportunity for me to brush up on my linear algebra and 3D math skills.
-
-<img src="/assets/images/raytracer.png">
 
 # Links
 
