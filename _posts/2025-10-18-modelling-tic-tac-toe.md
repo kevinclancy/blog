@@ -36,7 +36,7 @@ We will construct this closed system out of open systems such as the players. Th
 <img src="/assets/images/gameloop/ttt-player.drawio.png">
 </center>
 
-The above system is considered *open* because its input and output are not one-element sets; they contain actual information that must be received from and sent to unspecified destinations. Each turn, an element of BoardState is received as input. The player uses the current board state, possibly along with the player's own internal state, to decide a move to submit to the board.
+The above system is considered *open* because its input and output are not one-element sets; they contain actual information that must be received from and sent to unspecified destinations. Each turn, an element of $$BoardState$$, representing the current state of the board, is received as input. The player uses this board state, possibly along with the player's own internal state, to decide a move to submit to the board.
 
 Now, let's develop a formalism that allows us to compose complex systems from simpler systems.
 
@@ -72,7 +72,7 @@ Above, we consider $$\mathit{State}$$ the type of our dynamical system's interna
 * $$\mathit{nextState} : \mathit{State} \times \mathit{In} \to \mathit{State}$$ is a function that takes a pair of a "current" state and an input to a "next" state.
 * $$\mathit{output} : \mathit{State} \to \mathit{Out}$$ is a function that takes a state to an output.
 
-This matches the intuitive structure of game engines that I presented previously. Those familiar with digital logic may know the distinction between *Moore machines* and *Mealy machines*. The output of a Mealy machine may depend both on its input and its current state, whereas the output of a Moore machine may only depend on its current state. In this sense, a dynamical system is like a Moore machine rather than a Mealy machine: before its input can affect its output, it must store the input in its state as an intermediate step. This can be a bit awkward sometimes, but it's not a fundamental problem.
+This matches the intuitive structure of game engines that I presented previously. Those familiar with digital logic may know the distinction between *Moore machines* and *Mealy machines*: the output of a Mealy machine may depend both on its input and its current state, whereas the output of a Moore machine may only depend on its current state. In this sense, a dynamical system is like a Moore machine rather than a Mealy machine: before its input can affect its output, it must store the input in its state as an intermediate step. This can be a bit awkward sometimes, but it's not a fundamental problem.
 
 A dynamical system $$S : \vrt{\mathit{State}_S}{\mathit{State}_S} \leftrightarrows \vrt{\mathit{In}_S}{\mathit{Out}_S}$$ can be depicted as follows.
 
@@ -151,7 +151,7 @@ where $$f$$ is the identity function
 
 $$f(x) \defeq x$$
 
-and
+and the passback function $$f^\sharp$$ is defined as:
 
 $$
 f^\sharp(h, \ast) \defeq \begin{cases}
@@ -294,7 +294,7 @@ $$\mathit{MilitaryClock} \defeq \vrt{\pi_1}{f} \circ \mathit{Clock'}$$
 
 ## Demultiplexors
 
-Imagine a turn-based board game with multiple players. At each turn, we want to provide exactly one player with the state of the board so that they can make an informed move. The challenge is to send a payload value along a different wire depending on some selector value, and to send "nothing" along all other wires. More precisely, we need a combinational circuit, called a *demultiplexor*, that takes two inputs. Letting each bold natural number $$\mathbf{n}$$ denote the set of natural numbers less than it, i.e.
+Imagine a turn-based board game with multiple players. At each turn, we want to provide exactly one player with the state of the board so that they can make an informed move. The challenge is to send a payload value along a specific wire determined by some selector value, and to send "nothing" along all other wires. More precisely, we need a combinational circuit, called a *demultiplexor*, that takes two inputs. Letting each bold natural number $$\mathbf{n}$$ denote the set of natural numbers less than it, i.e.
 $$\mathbf{n} \defeq \{ 0, 1, \ldots, n-1 \}$$, these inputs are:
 
 * The *payload*, whose type $$\mathit{Payload}$$ may vary

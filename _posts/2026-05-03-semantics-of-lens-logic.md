@@ -32,23 +32,9 @@ Before we start, we establish some preliminary concepts. Namely, we formalize se
 
 Note that a semantic partial system is essentially a partial dynamical system paired with an initial state, as the function $$\bar{p} : S \to (1 + S)^A \times B$$ can be thought of as the pair of functions of types $$S \to B$$ and $$S \to (1 + S)^A$$, the latter of which can be desugared to $$S \times A \to (1 + S)$$.
 
-## Example: Echo boxes
-
-Recall that a dynamical system was defined as a lens of type $$\vrt{\mathsf{State}}{\mathsf{State}} \leftrightarrows \vrt{\mathsf{In}}{\mathsf{Out}}$$. Consider the domain arena $$\vrt{\mathsf{State}}{\mathsf{State}}$$; this arena mediates around some inner system that our initial formulation of dynamical systems had no way to describe. Ask yourself: how should this inner system be defined? The answer is that it is mediating an *echo box* which starts with some initial value $$s_0 \in \mathsf{State}$$ and produces (or "echoes") at each time step the value it received from its environment on the previous timestep. We define this inner system as:
-
-$$\mathsf{echo}_{\mathsf{State}}^{s_0} \defeq (\mathsf{State}, s_0, \overline{\mathsf{echo}}_\mathsf{State})$$
-
-where
-
-$$\overline{\mathsf{echo}}_{\mathsf{State}}(s) \defeq (f, s)$$
-
-where for all $$s' \in \mathsf{State}$$ we have
-
-$$f(s') \defeq \kappa_2 s'$$
-
-We will proceed to develop a more refined notion of a dynamical system than our original formulation: as a first approximation, it will consist of a lens $$\vrt{f^\sharp}{f} : \vrt{\mathsf{State}}{\mathsf{State}} \leftrightarrows \vrt{\mathsf{State}}{\mathsf{State}}$$ paired with an initial state $$s_0 \in \mathsf{State}$$ and a "condition" $$Q$$ on outer systems on $$\vrt{\mathsf{In}}{\mathsf{Out}}$$, with the expectation that $$\vrt{f^\sharp}{f}$$ "connects" an echo box $$\mathsf{echo}_{\mathsf{State}}^{s_0}$$ to some outer system satisfying the constraint $$Q$$.
-
 # Predicates on arenas
+
+## Inner and outer systems
 
 > **Definition**
 >
@@ -70,10 +56,66 @@ Analogously, a useful notion of a predicate on an arena might provide partial in
 
 We develop a semantics in which both placements — inner and outer — give rise to predicate notions, and these interact via lens-mediated structure.
 
-> **Definition**
+As a first attempt, we might define our predicate notions as follows:
+
+> **Preliminary definition**
 >
 > An **inner predicate** $$P$$ on an arena $$\vrt{A}{B}$$ is a set of inner systems on $$\vrt{A}{B}$$. An **outer predicate** $$Q$$ on an arena $$\vrt{A}{B}$$ is a set of outer systems on $$\vrt{A}{B}$$.
 
-# Transforming arena predicates
+But this definition is problematic. An obvious predicate in $$\vrt{A}{B}$$ is $$\mathsf{true}$$, also called $$\top$$: the collection of all possible inner systems on $$\vrt{A}{B}$$. This collection, however, is so big that it is unwieldy. Since each triple in the collection contains a set as its first component, we have at least one inner system for each non-empty set. This implies that the collection of inner systems is "too large" to be a set.
 
-Given an arena $$\vrt{A}{B}$$
+## System behaviors
+
+A better approach is to prohibit our logic from making any statements about a system's internal state. The $$S$$ component of an inner system $$(S, s_0, \bar{p} : S \to (1 + S)^A \times B)$$ can be thought of as its representation: the set of the system's possible internal states. Instead of quantifying over all possible representations, we choose a single representation $$Z$$ whose elements directly convey the *behavior* of the system:
+
+Letting, $$A^*$$ denote the set of all finite sequences of elements of $$A$$, and letting $$\langle a_1, a_2, \ldots, a_n \rangle$$ denote the member of $$A^*$$ whose elements are, in order, $$a_1, a_2, \ldots a_n$$, we define:
+
+$$Z_{A,B} \defeq \{ f \in (1 + B)^{A^*} \mid (\forall \sigma \in A^*.~f(\sigma) = \kappa_1 \ast \Rightarrow \forall \sigma' \in A^* f(\sigma \cdot \sigma') = \kappa_1 \ast)  \wedge f(\langle \rangle) \neq \kappa_1 \ast \} $$
+
+$$f \in Z_{A,B}$$ represents a system such that, for $$\sigma \in A^*$$,
+
+* If $$f(\sigma) = \kappa_2 b$$ then the system produces output $$b$$ after receiving the sequence of inputs $$\sigma$$.
+* If $$f(\sigma) = \kappa_1 \ast$$ then the system halts due to a precondition violation after reading some prefix of the sequence of inputs $$\sigma$$ (possibly the entire sequence).
+
+With the above points in mind, the two constraints in the definition of $$Z_{A,B}$$ can be understood as follows:
+
+The first constraint
+
+$$(\forall \sigma \in A^*.~f(\sigma) = \kappa_1 \ast \Rightarrow \forall \sigma' \in A^*.~f(\sigma \cdot \sigma') = \kappa_1 \ast) $$
+
+can be understood to mean that once our system halts due to a precondition violation, it cannot produce any outputs after receiving further inputs. The second constraint
+
+$$f(\langle \rangle) \neq \kappa_1 \ast$$
+
+can be understood to mean that no precondition can be violated before the system has received any inputs. We summarize the above discussion with the following definition:
+
+> **Definition**
+>
+> The set $$Z_{A,B}$$ defined above is called the set of **inner behaviors** on the arena $$\vrt{A}{B}$$.
+
+> **Definition**
+>
+> A subset of $$Z_{A,B}$$ is called an **inner predicate** on the arena $$\vrt{A}{B}$$.
+
+## Behaviors represent classes of systems
+
+Any element $$f \in Z_\vrt{A}{B}$$ can serve as the initial state of an inner system $$(Z_{A,B}, f, \zeta : Z_{A,B} \to (1 + Z_{A,B})^A \times B)$$.
+
+TODO: define and explain the final coalgebra
+
+# A logic on inner predicates
+
+Now we explore the design of our logic. First, we want the ability to constrain the set of inputs our inner systems expect at specific times, as well as constrain the set of outputs our inner systems produce. A constraint on a set like $$A$$ is essentially a subset $$X \subseteq A$$; thus, our logic will contain a sublogic for expressing subsets of the input and output sets $$A$$ and $$B$$. Such logics are not novel; this sublogic, formulas could denote subsets and logical operators such as $$- \wedge -$$ and $$- \vee -$$ could correspond to set-theoretic operators such as $$- \cap -$$ and $$- \cup -$$. We elide the definition of this sublogic for now, but use subscripted symbols such as $$\varphi_A, \psi_A$$ as metavariables for formulas expressing subsets of $$A$$, and likewise use $$\varphi_B, \psi_B$$ for formulas expressing subsets of $$B$$. As an abuse of notation, we write $$a \in \varphi_A$$ to mean that $$a$$ is an element of the set denoted by $$\varphi_A$$.
+
+The metavariable $$\upsilon$$ is used for logic formulas describing sets of inner behaviors on $$\vrt{A}{B}$$. A first pass at its syntax might look as follows:
+
+$$\upsilon ::= [\varphi_A](\upsilon) \mid \downarrow \varphi_B \mid \upsilon_1 \wedge \upsilon_2 \mid \upsilon_1 \vee \upsilon_2$$
+
+Roughly, the formula $$[\varphi_A](\upsilon)$$ denotes the set of all behaviors $$f$$ such that:
+
+* $$\zeta(f) = (h, b)$$
+* $$b$$ is any element of $$B$$
+* For every $$a \in \varphi_A$$, $$h(a) = \kappa_2 f'$$ for some $$f' \in Z_{A,B}$$
+* $$f' \in \upsilon$$
+
+And the formula $$\downarrow \varphi_B$$ denotes the set of all behaviors $$f$$ such that $$f(\langle \rangle) \in \varphi_B$$.

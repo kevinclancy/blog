@@ -21,22 +21,22 @@ I've had a few small ideas about these game models that I haven't gotten around 
 
 ## Player as Robot
 
-In my first post, I mentioned that I wanted to analyze games as *closed* dynamical systems, i.e. systems which are not influenced by input and which do not produce any output. These systems are more simulations than games. Since closed systems do not take input, does that mean they cannot model the notion of a *player*, a robot modelling a sentient being whose actions are driven by external input?
+In my first post, I mentioned that I wanted to analyze games as *closed* dynamical systems, i.e. systems which are not influenced by input and which do not produce any output. These systems are more simulations than games. Consider: since closed systems do not take input, does that mean they cannot model the notion of a *player*, a robot modelling a sentient being whose actions are driven by external input?
 
 If we're using possibilistic dynamic systems, then the answer is no. In possibilistic systems, it is extremely simple to model a player using a robot. A player can be modeled as a robot whose $$\mathit{nextState}$$ function produces the set of all possible successor states paired with all possible action submissions.
 
 ## Robot Input as Observations
 
-In [Modelling MegaZeux]({% post_url 2025-11-04-modelling-megazeux %}), every robot receives the full board state as input at every frame. This means that every robot is omniscient. Hence, a robot somehow knows where every other robot is, even if they are separated from it by a wall. To gain some realism, we could modify the environment to only send a robot the positions of those robots and walls within its line of sight.
+In [Modelling MegaZeux]({% post_url 2025-11-04-modelling-megazeux %}), every robot receives the full board state as input at every frame. This means that every robot is omniscient. A robot somehow knows where every other robot is, even if they are separated from it by a wall. To gain some realism, we could modify the environment to only send a robot the positions of those robots and walls within its line of sight.
 
 This isn't to say that giving robots omniscient perception is always undesirable. But just that in many games, players expect robots to
 perceive realistically, and so in the general case each individual robot should perceive only a strict subset of the complete game state.
 
 # Fine State vs Coarse State
 
-In [my first post]({% post_url 2025-07-11-towards-mathematical-model %}), I awkwardly noted that a robotic script performs the role of a robot's brain. I pointed out that while the fuse box is implemented as a robot, the real world object that it simulates (a fuse box) is not an animal and therefore does not have a brain. But the fuse box does have physical characteristics, such as a boolean flag indicating whether it is on or off, that is both beyond the scope of the MegaZeux game engine's capacity to understand and relevant to how it interacts with the other objects in the game world.
+In [my first post]({% post_url 2025-07-11-towards-mathematical-model %}), I awkwardly noted that a robotic script performs the role of a robot's brain. I pointed out that while the fuse box is implemented as a robot, the real world object that it simulates (a fuse box) is not an animal and therefore does not have a brain. But the fuse box does have physical characteristics, such as a rotation angle of a switch indicating whether it is on or off, that is both beyond the scope of the MegaZeux game engine's capacity to understand and relevant to how it interacts with the other objects in the game world.
 
-We can think of the physical properties within the scope of the game engine as *coarse grained*. A robot's cell position in the game world's grid is the only coarse grained physical property that we have discussed so far. Physical properties that fall outside the scope of the game engine, such as the on/off position of the fuse box, can only be read and written by custom scripts. We can think of these properties as *fine grained*.
+We can think of the physical properties within the scope of the game engine as *coarse grained*. A robot's cell position in the game world's grid is the only coarse grained physical property that we have discussed so far. Physical properties that fall outside the scope of the game engine, such as the on/off position of the fuse box switch, can only be read and written by custom scripts. We can think of these properties as *fine grained*.
 
 Game logic consists of *scripts* acting on *data*. All scripts are inherently fine grained, because they are written by a game developer for a specific game; they are not part of the engine and do not describe behavior that is generic across all games. Data can be fine grained or coarse grained; the mental states described in [modeling MegaZeux-style games]({% post_url 2025-11-04-modelling-megazeux %}) are fine grained, while robot positions are coarse grained.
 
@@ -60,13 +60,13 @@ As a side note, MegaZeux does provide a limited coarse inventory system, but jus
 
 # Robots, Encapsulation, Interactions
 
-There's something else that bothers me about using the term "pseudo brain" in my initial post. The player and the fuse box are completely different types of things. The player simulates a sentient being that can establish goals and affect the world around it. The fuse box is just an object with no cognitive power, which contains fine state but remains static unless acted upon. Why does the fuse box have a script associated with it? Scripts are actions that change the world state, whereas inanimate objects like the fuse box cannot change the world state. When the player touches the fuse box, the fuse box does not decide to change its position and send a message along the "fuse box off" channel; that action is caused by the player.
+There's something else that bothers me about using the term "pseudo brain" in my initial post. The player and the fuse box are completely different types of things. The player simulates a sentient being that can establish goals and affect the world around it. The fuse box is just an object with no cognitive power, which contains fine state but remains static unless acted upon. Why does the fuse box have a script associated with it? Scripts are inherently active, changing fine state directly and submitting actions to change coarse state. In constrast, inanimate objects like the fuse box should not drive any state change. When the player touches the fuse box, the fuse box does not decide to change its position and send a message along the "fuse box off" channel; that action is caused by the player.
 
 Perhaps MegaZeux is under-taxonomized. Instead of robots, we could use constructs of a different type to represent inanimate objects with fine state but no behavior; let's call this type of construct a *widget*. When a robot attempts to move into a widget's position, a function which performs their interaction should execute. This function should take as parameters both the fine state of the widget and the fine state of the robot, as well as the coarse state that the robot observes on the particular frame that the two objects collide. The function should produce as output a pair of two new states for the widget and robot.
 
-Also consider what happens when one robot attempts to move into a cell that is already occupied by another robot. The environment could send both of the robots a "touch" message, but both robots would need to access the fine state of the other in order to respond properly. One robot may even need to change the fine state of the other, say by knocking a sword out of the other robot's hands. Should one robot A's touch handler drop its sword in response to a collision, or should robot B's handler knock robot A's sword from its hands?
+Also consider what happens when one robot attempts to move into a cell that is already occupied by another robot. The environment could send both of the robots a "touch" message, but both robots would need to access the fine state of the other in order to respond properly. One robot may even need to change the fine state of the other, say by knocking a sword out of the other robot's hands. Should robot A's touch handler drop its sword in response to a collision, or should robot B's handler knock robot A's sword from its hands?
 
-This discussion suggests that handling interactions from a first-person perspective is a flawed idea. What we really need is a single interaction handler. This handler could take the fine states and observations of both robots as arguments, and its results should include updated fine states of both robots. Be warned, this line of reasoning is leading to a radical departure from the models I've presented so far, as a dynamical system representing a robot can no longer have exclusive access to the robot's fine state.
+This discussion suggests that handling interactions from a first-person perspective is a flawed idea. What we really need is a single interaction handler. This handler could take the fine states and observations of both robots as arguments, and its results should include updated fine states of both robots. Be warned: this line of reasoning is leading to a radical departure from the models I've presented so far, as a dynamical system representing a robot can no longer have exclusive access to its own fine state.
 
 ```
 function handle_robot_collision(swordsman_state a, swordsman_state b) : swordsman_state * swordsman_state = {
@@ -141,12 +141,12 @@ This ambient robot does not contain fine state that replicates the fine state of
 
 ## Doubts
 
-The above section has some workable ideas: for example, ambient robots handling interactions over multiple frames would be useful for quickly creating short cinematic sequences. However, giving a single event handler access to multiple robots' fine states seems too large of a departure from both the framework I've designed so far and standard game scripting practice. If I come back to this project, I am going to abandon that particular idea. I'm still on the fence about distinguishing between widgets and robots.
+The above section has some workable ideas: for example, ambient robots handling interactions over multiple frames would be useful for quickly creating short cinematic sequences. However, giving a single event handler access to multiple robots' fine states seems too large of a departure from both the framework I've designed so far and standard game scripting practice. If I come back to this project, I am going to abandon the idea of interaction handlers. I'm still on the fence about distinguishing between widgets and robots.
 
-✅ Ambient robots for multi-frame interactions
-✅ Interaction handlers as separate entities
-❌ Single function accessing multiple robots' fine states
-🤔 Distinguishing widgets from robots
+* ✅ Ambient robots for multi-frame interactions
+* ✅ Interaction handlers as separate entities
+* ❌ Single function accessing multiple robots' fine states
+* 🤔 Distinguishing widgets from robots
 
 # Globals vs messages
 
@@ -157,26 +157,38 @@ In MegaZeux, fine state is stored in what are called *counters*. Counters are gl
 
 A central guiding principle for my models has been *realism*. Because a game is a simulation of the real world, developers expect it to behave like the real world. For example, having all NPC's ``act simultaneously'' each frame, all responding to stimuli derived from a common world state at a moment in time, is a decision made in appeal to realism.
 
-Global counters are not realistic. In the real world, state is located in space. By associating a piece of fine state with a robot that either has custody of it or shares proximity with it, we make it clear to the developer what state they are likely to manipulate when writing the robot's code. Quick interactions between spatially separated objects can be triggered by sending a message along a channel. We therefore do away with global counters, as they are subsumed by the more realistic combination of fine state and message channels. Weirdness would be rewritten in the following way:
+Global counters are not realistic. In the real world, state is located in space. By associating a piece of fine state with a robot that either has custody of it or shares proximity with it, we make it clear to the developer what state they are likely to manipulate when writing the robot's code. Quick interactions between spatially separated objects can be triggered by sending messages along channels. We therefore do away with global counters, as they are subsumed by the more realistic combination of fine state and message channels.
+
+Weirdness would be rewritten in the following way:
 
 * Turning a sink on or off sends a boolean message along the `water_pipe` channel. When the message arrives at the `stream` robot beneath the house, the `stream` robot either increments or decrements a fine state integer variable. The waterway "dries up" when the integer variable is incremented to 3.
 * The player stores its inventory in its fine state as an element of a set datatype.
 
 # Dynamic Behavior
 
-So far, we've made references to the state of our models advancing over a discrete sequence of time steps. But we've done so informally; we still don't have a formal definition of our system's behavior. The behavior of a deterministic system could be represented as a sequence of states, i.e. a function of type $$\mathbb N \to \matit{State}$$. The way such a behavior is derived from a dynamical system is described in chapter 3 of *Categorical Systems Theory*. The behavior of a non-deterministic system would probably be the set of all possible state sequences. In Categorical Systems Theory, Myers doesn't explore the behavior of non-deterministic systems very far, acknowledging it as a blind spot.
+So far, we've made references to the state of our models advancing over a discrete sequence of time steps. But we've done so informally; we still don't have a formal definition of our system's behavior. The behavior of a deterministic system could be represented as a sequence of states, i.e. a function of type $$\mathbb N \to \mathit{State}$$. The way such a behavior is derived from a dynamical system is described in chapter 3 of *Categorical Systems Theory*. The behavior of a partial possibilistic system would probably be the set of all possible state sequences, or $$(0,\ast)$$ if any precondition violations are reachable from the initial state. In Categorical Systems Theory, Myers doesn't explore the behavior of possibilistic systems very far, acknowledging it as a blind spot.
 
-# Partial Possibilistic Systems
+# Fine State Transfer
 
-In [modelling MegaZeux-style games]({% post_url 2025-11-04-modelling-megazeux %}), we used possibilistic systems to represent non-deterministic state update. The key feature was that the passback function produced a set of successor states instead of a single successor state
+When we consider physical objects like keys and swords as part of a robot's fine state, our framework's choice to represent fine states as set elements shows a weakness: fine state can be duplicated and discarded.
 
-$$\mathit{nextState} : \mathit{State} \times \mathit{In} \to P(\mathit{State})$$
+Let me give you an example. I can define a function $$\mathit{dup} : 1 \to 1 \times 1$$ as follows
 
-We handled precondition violations by mapping them to the empty set. This is a hack that is bound to cause problems when we try to define dynamic behavior. A more robust and principled approach would be to define a new type of dynamical system that can express both non-determinism and precondition violations. Let $$P_+$$ be the *non-empty powerset operator* which maps a set $$X$$ to the set of all non-empty subsets of $$X$$. Then our new type of dynamical system, which we could call a *partial possibilistic dynamical system* would have a passback function of the following form
+$$\mathit{dup}(\ast) \defeq (\ast, \ast)$$
 
-$$\mathit{nextState} : \mathit{State} \times \mathit{In} \to 1 + P_+(\mathit{State})$$
+Now, if $$\ast$$ represents a physical object, then $$\mathit{dup}$$ is a "cloning machine". This is physically unrealistic, as it violates the famous law of conservation of mass: "Matter can be neither created nor destroyed, only transformed".
 
-A state/input pair that violates our system's precondition would map to the left component $$(0, \ast)$$, whereas any state/input pair that satisfies our system's precondition would map to a non-empty set of successor states $$X$$ in the right component $$(1, X)$$.
+What we need is to replace a dynamical system's passforward $$\mathit{State} \to \mathit{Out}$$ and passback $$\mathit{State} \times \mathit{In} \to \mathit{State}$$ with a different kind of "directed arrow" than functions that do not allow physically unrealistic duplication.
+
+In category theory the correct setting for such a restriction is a monoidal category. In a monoidal category, an arrow $$A \to B$$ can be thought of as a resource transformation: it consumes $$A$$ in order to produce $$B$$. The reason it can be thought of as a resource transformation is because a monoidal categories lack pairing: the idea that for any $$f : A \to B$$ and $$g : A \to C$$ we can obtain a function $$h : A \to B \times C$$ defined such that $$h(a) \defeq (f(a), g(a))$$. Duplication would then be obtained by letting $$f = g = \mathit{id}$$. Monoidal categories also lack projection, i.e. for any $$A,B$$ there does not necessarily exist a function $$\pi_0 : A \times B \to A$$, which would allow us to make the "resource" of type $$B$$ disappear.
+
+Myers' book focuses totally on Cartesian categories, which have both pairing and projection. So we'll need to create our own alternative to lenses built on top of monoidal rather than Cartesian categories. A monoidal lens
+
+$$\vrt{f^\sharp}{f} : \vrt{A^-}{A^+} \leftrightarrows \vrt{B^-}{B^+}$$
+
+would consist of a "residual type" $$R$$, a passforward arrow $$f : A^+ \to R \otimes B^+$$ and a passback arrow $$f^\sharp : R \otimes B^- \to A^-$$.
+
+The idea is that our lens can't simply re-use $$A^+$$ in both the passforward and passback directions. Instead, the passforward transforms $$A^+$$ in to $$R \otimes B^+$$, where $$B^+$$ represents the output to emit, and $$R$$ represents leftover resources that were not used to produce output but which must be used in the passback direction.
 
 # Why I'm Pausing This Work
 
