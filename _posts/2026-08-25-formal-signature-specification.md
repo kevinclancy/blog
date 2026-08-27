@@ -1,6 +1,6 @@
 ---
 layout: post_classic
-title: "Formal Signature Specification"
+title: "2. Formal Signature Specification"
 date: 2026-08-25 09:00 -0700
 categories: [understanding-module-systems]
 published: true
