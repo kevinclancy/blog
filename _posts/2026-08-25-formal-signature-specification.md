@@ -363,11 +363,11 @@ Not bad. But to be fair, this was one of the easiest challenges I could give it.
 
 # Conclusion
 
-While natural language comments can be frustratingly vague, a signature's laws aren't doomed to be stuck in this paradigm. We can specify the laws using the Gospel specification language, or through Hegel tests. Furthermore, there are formal verification, testing, and AI tools that can help us gain confidence that a struct actually satisfies a signatures laws--or demonstrate why it fails to satisfy them!
+While natural language comments can be frustratingly vague, a signature's laws can be expressed in other ways. We can specify the laws using the Gospel specification language or through Hegel tests. Furthermore, there are formal verification, testing, and AI tools that can help us gain confidence that a struct actually satisfies a signatures laws--or demonstrate why it fails to satisfy them!
 
 In my next post, I plan to discuss two things:
 
-* How and why OCaml programs are structured as networks of struct definitions.
-* How the operations that a struct provides may perform side effects such as state updates, and what the implications of that are.
+* How and why OCaml programs are structured as networks of module definitions.
+* How the operations that a module provides may perform side effects such as state updates, and what the implications of that are.
 
 Stay tuned.
