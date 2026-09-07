@@ -1,0 +1,17 @@
+graph example {
+  bgcolor="transparent";
+  node [shape=circle, width=0.40, fixedsize=true,
+        style=filled, fillcolor="#ffffff", color="#333333", penwidth=1.4,
+        fontname="Helvetica", fontsize=13, fontcolor="#111111"];
+  edge [color="#333333", penwidth=1.4];
+
+  L  [label="0", pos="0.00,0.00!"];
+  C  [label="1", pos="1.50,0.00!"];
+  TR [label="2", pos="2.60,0.68!"];
+  BR [label="3", pos="2.34,-0.84!"];
+
+  L -- C;
+  L -- TR;
+  C -- TR;
+  C -- BR;
+}
