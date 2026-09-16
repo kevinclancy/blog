@@ -32,10 +32,11 @@ Above, `t` is the type of age maps, which the value `age_map` belongs to. And `u
 
 In addition, the signature should also contain a behavior specification. Intuitively, it would list behavioral equations such as the following:
 ```
-forall (map:t) (name:string) (age:int) (age2:int) (age3:int).
-   (insert map name age) &&
-   ((not (insert map name age2)) Until (age3 = get map name)) =>
-   age3 = age
+(* LAW:
+     insert map name age;
+     ... any code that does not insert into m under [name] ...
+     assert (get map name = age)
+*)
 ```
 
 Above is a "pseudocode specification", in that it doesn't conform to any formally defined specification language that I know of. It says that if we insert `(name,age)` into the map and then do not insert any other age corresponding to `name` before calling `get map name`, then `get map name` should return `age`. More concisely, an entry inserted into the map stays there unless we override it.
@@ -121,6 +122,8 @@ While the signature describes how functional queues can be used, we cannot provi
 * For each type declaration in the signature, the struct must have a matching concrete type definition.
 * For each val declaration in the signature, the struct must have a concrete value definition (a let binding) whose type matches the declaration's.
 
+Furthermore, the operations defined by the concrete value definitions must obey the signature's laws.
+
 Here is an example implementation of the Queue signature:
 ```
 module ListQueue = struct
@@ -165,7 +168,7 @@ In addition to access to the Queue datatype, the BFS algorithm requires access t
 
 ```
 module type TraverseGraph = sig
-  (** An undirected graph of location nodes, only some of which are traversable.
+  (** An directed graph of location nodes, only some of which are traversable.
       This graph is static, in that traversability and adjacency do not change over time.
   *)
 
@@ -195,7 +198,13 @@ module type TraverseGraph = sig
   *)
 
   (* LAW:
-    n Eq m => (adjacent_nodes n = adjacent_nodes m)
+    Write [x ∈≡ l] for "some y in list l has x Eq y".
+
+    If n Eq m, then for every node x,
+      x ∈≡ (adjacent_nodes n)  iff  x ∈≡ (adjacent_nodes m)
+
+    i.e. Eq-equivalent nodes have the same neighbors, up to Eq,
+    ignoring order and duplicates.
   *)
 end
 ```
@@ -315,7 +324,7 @@ module ListStack = struct
 
   let pop s =
     match s with
-    | [] -> invalid_arg "pop: empty stack"
+    | [] -> invalid_arg "pop: empty queue"
     | a :: s' -> (a, s')
 end
 
@@ -430,8 +439,7 @@ module type PushPopBag = sig
 
   (* LAW:
 
-     If c is the bag of elements underlying a push-pop bag b, then [pop b] = (a, b'), where the bag underlying push-pop bag b' is (c - a),
-     i.e. c with one occurrence of a removed.
+     If c is the bag of elements underlying a non-empty push-pop bag b, then [pop b] = (a, b'), where a occurs in c and the bag underlying push-pop bag b' is (c - a), i.e. c with one occurrence of a removed.
   *)
 end
 ```
@@ -455,7 +463,7 @@ module type JobBag = sig
 end
 ```
 
-If only we had some "module function" construct that transforms module arguments into result modules, we could invoke it multiple times to produce different JobBag modules, all of which implement the `JobBag` signature but which have different push/pop behaviors (one with FIFO behavior, one with LIFO behavior, etc.).
+If only we had some "module function" construct that transforms module arguments into module results, we could invoke it multiple times to produce different JobBag modules, all of which implement the `JobBag` signature but which have different push/pop behaviors (one with FIFO behavior, one with LIFO behavior, etc.).
 
 Such "module functions" exist in OCaml. They are called *functors*. A functor `JB` for producing `JobBag` implementations might appear as follows.
 ```

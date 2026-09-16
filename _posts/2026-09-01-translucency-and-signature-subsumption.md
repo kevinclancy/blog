@@ -85,7 +85,7 @@ The *sharing constraint* is another useful signature constructor. It has the fol
 
 $$\mathsf{S~with~type~t} = \tau$$
 
-Above, $$\mathsf S$$ must be a signature that has an opaque type component named t and $$\tau$$ may be an arbitrary type expression. This constructor is considered ill formed whenever either $$\mathsf S$$ has no type component t or S has a *transparent* type component t. Thus, whenever the signature $$\mathsf{S~with~type~t} = \tau$$ is well formed, we know that $$\mathsf S <: (\mathsf{S~with~type~t} = \tau)$$.
+Above, $$\mathsf S$$ must be a signature that has an opaque type component named t and $$\tau$$ may be an arbitrary type expression. This constructor is considered ill formed whenever either $$\mathsf S$$ has no type component t or S has a *transparent* type component t. Thus, whenever the signature $$\mathsf{S~with~type~t} = \tau$$ is well formed, we know that $$(\mathsf{S~with~type~t} = \tau) <: \mathsf S$$.
 
 Here is an example usage of sharing constraints. Recall the `TraverseGraph` signature from [my first post]({% post_url 2026-08-23-introduction %}):
 ```
@@ -235,7 +235,7 @@ end
 
 It declares an opaque family of types `'a t`. These opaque types are fundamentally different than the the opaque type `TraverseGraph.node`, in the sense that they are intended to hide their concrete representations. These type declarations occur in signatures that seal structs immediately once they've been created. On the other hand, the `TraverseGraph.node` declares a placeholder for a type drawn from some outside context; its intended use involves submsumption and/or sharing constraints.
 
-Earlier, I claimed "modules are like vending machines", in the sense that they provide laws governing their interactions, isolating us from a complex internal representation. The signature $$\mathsf{TraverseGraph}~\mathsf{with}~\mathsf{type}~\mathsf{node}=\mathsf{int}$$, on the other hand, doesn't isolate us from anything. Yet it still has laws that govern our interaction with it. So in this sense, it may be viewed as a degenerate vending machine that provides operations on existing datatypes without encapsulating any new datatypes of its own. Then, subsuming into `TraverseGraph` (as when we apply the `shortest_path` function) allows us to temporarily view `TraverseGraph.node` type as abstract in a local context.
+Earlier, I claimed "modules are like vending machines", in the sense that they provide laws governing their interactions, isolating us from complex internal representations. The signature $$\mathsf{TraverseGraph}~\mathsf{with}~\mathsf{type}~\mathsf{node}=\mathsf{int}$$, on the other hand, doesn't isolate us from anything. Yet it still has laws that govern our interaction with it. So in this sense, it may be viewed as a degenerate vending machine that provides operations on existing datatypes without encapsulating any new datatypes of its own. Then, subsuming into `TraverseGraph` (as when we apply the `shortest_path` function) allows us to temporarily view `TraverseGraph.node` type as abstract in a local context.
 
 # Conclusion
 
