@@ -489,12 +489,12 @@ There's a lot more that can be said about functors, but I will leave that discus
 
 # Conclusion: Modules are Like Vending Machines
 
-I will wrap things up with a physical world analogy. Modules are like soda vending machines. The consumers interacts with the vending machine by performing a sequence chosen from the following set of operations:
+I will wrap things up with a physical world analogy. Modules are like soda vending machines. The consumer interacts with the vending machine by performing a sequence chosen from the following set of operations:
 
 * Coin insertion
 * Product selection
 * Coin return
 
-Coin insertion, for example, requires a coin and a vending machine as input, and produces a modified vending machine as output. The consumer knows that if she inserts a coin and then selects a product, she will probably receive a soda. It is not enough for the machine to merely provide the three operations listed above; it must obey laws that are mutually understood by the machine's creator and the consumer (its signature). For example, the consumer knows that if she performs "coin insertion" and then performs "coin return" immediately afterward, the machine should emit the inserted coin. However, the consumer does not care about where her coin is stored in between, the shape and volume of its container, etc. These details are hidden from the consumer to make her life easier.
+Coin insertion, for example, requires a coin and a vending machine as input, and produces a modified vending machine as output. The consumer knows that if she inserts a coin and then selects a product, she will probably receive a soda. It is not enough for the machine to merely provide the three operations listed above; it must obey laws (its signature's laws) that are mutually understood by the machine's creator and the consumer. For example, the consumer knows that if she performs "coin insertion" and then performs "coin return" immediately afterward, the machine should emit the inserted coin. However, the consumer does not care about where her coin is stored in between, the shape and volume of its container, etc. These details are hidden from the consumer to make her life easier.
 
 So far, we have used comments to express a signature's laws. In my next post, I will explore more formal techniques for doing so.
