@@ -10,9 +10,9 @@ We run a program by invoking a "main" procedure, either because we want to retri
 
 In OCaml, it may be necessary to initialize a module before it is used. A counter module, for example, may need to allocate an integer reference storing the starting value.
 
-We say that module `A` depends on module `B` if module `B` is referenced anywhere from within the definition of module `A`. The graph whose edges comprise the "depends on" relation is called the *module dependency graph*.  To ensure that every module is initialized before it is used, we stipulate that the module dependency graph not contain cycles. (For the most part; OCaml supports recursive modules, but they are the exception to the rule.) This is overly conservative, since a module may depend on another without needing it for initialization. However, it seems to work well enough in practice.
+We say that module `A` depends on module `B` if module `B` is referenced anywhere from within the definition of module `A`. The graph whose edges comprise the "depends on" relation is called the *module dependency graph*. The OCaml compiler rejects cyclic dependency graphs, which conveniently guarantees that every module is initialized before it is used.
 
-Roughly, we can think of modules that occur earlier in the topological sorting of the module dependency graph as lower level vocabularies and modules occurring later as higher level vocabularies. Each module adds complexity on top of the modules it depends on, both by combining multiple modules, and by combining their abstract datatypes and operations in complex ways. It compensates for the additional complexity by sealing: hiding its new datatype definitions behind abstract types of its own, and defining laws that govern the way its operations interact with those datatypes.
+Roughly, we can think of modules that occur earlier in the topological sorting of the module dependency graph as lower level vocabularies and modules occurring later as higher level vocabularies. Internally, each module is more complex than the ones it depends on, since it combines their datatypes and operations in new ways. Externally, it can be simpler: by sealing, it hides its new representations behind abstract types of its own and states laws governing its operations, so that clients work in its vocabulary alone rather than in the vocabularies of everything beneath it.
 
 # The Happy Child Program
 
@@ -172,7 +172,7 @@ let () =
   HappyChild.show_off ()
 ```
 
-OCaml's build system Dune culls out any modules that do not transitively depend on `Main` and then topologically sorts them into an initialization order. It starts with a module dependency DAG which looks like this:
+OCaml's build system Dune culls out any modules that `Main` does not transitively depend on and then topologically sorts them into an initialization order. It starts with a module dependency DAG which looks like this:
 <figure>
 <img
   src="/assets/images/building-a-program-from-modules/module-dag.png"
@@ -187,7 +187,7 @@ Shoes
 HappyChild
 Main
 ```
-Execution then initializes each module from top to bottom, where modules are initialized by normalizing the right-hand-sides of each of its let bindings from top to bottom. By the time `Main` is initialized, `HappyChild` has already been initialized (and transitively both `NumCounter` and `Shoes`) so that we can invoke its `show_off` operation.
+Execution then initializes each module from top to bottom, where modules are initialized by evaluating the right-hand-sides of each of its let bindings from top to bottom. By the time `Main` is initialized, `HappyChild` has already been initialized (and transitively both `NumCounter` and `Shoes`) so that we can invoke its `show_off` operation.
 
 I'm not sure if I like that initialization of independent modules is ordered alphabetically. That seems chaotic. It may be better to require the programmer to provide an initialization list themselves. But that's not how Dune handles things.
 

@@ -364,15 +364,15 @@ end
 
 module JQ : JobQueue = struct
    type t = {
-      task_queue : (unit -> unit) Q.t ;
+      mutable task_queue : (unit -> unit) Q.t ;
       (** A queue of "tasks", which are functions taking no input and producing no result *)
 
-      last_executed : time ;
+      mutable last_executed : time ;
       (** The time that the queue last executed a task *)
 
       execution_period : time_delta
-      (** The time minimum time required between executing distinct tasks *)
-   } ref
+      (** The minimum time required between executing distinct tasks *)
+   }
 
    let try_task = ... implementation goes here ...
 
@@ -468,16 +468,16 @@ If only we had some "module function" construct that transforms module arguments
 Such "module functions" exist in OCaml. They are called *functors*. A functor `JB` for producing `JobBag` implementations might appear as follows.
 ```
 module JB (B : PushPopBag) : JobBag = struct
-   type t = r{
-      task_bag : (unit -> unit) B.t ;
+   type t = {
+      mutable task_bag : (unit -> unit) B.t ;
       (** A bag of "tasks", which are functions taking no input and producing no result *)
 
-      last_executed : time ;
+      mutable last_executed : time ;
       (** The time that the queue last executed a task *)
 
       execution_period : time_delta
-      (** The time minimum time required between executing distinct tasks *)
-   } ref
+      (** The minimum time required between executing distinct tasks *)
+   }
 
    let try_task = ... implementation goes here ...
 

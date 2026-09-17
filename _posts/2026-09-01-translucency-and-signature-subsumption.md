@@ -152,7 +152,7 @@ end
 Then we can pass the struct into our BFS function and print its result:
 ```
 let () =
-  let opt_path = shortest_path (module MyGraph) (module Queue) 0 2 in
+  let opt_path = shortest_path (module MyGraph) 0 2 in
   match opt_path with
   | Some(path) ->
     List.iter (fun n -> Printf.printf "%d\n" n) path
