@@ -16,7 +16,7 @@ These posts aim to create mathematical foundations for game-specific programming
 ### The Model
 
 <ul class="post-list">
-{% assign model_posts = site.categories.modelling-computer-games | where_exp: "post", "post.subseries != 'logic'" | reverse %}
+{% assign model_posts = site.categories.modelling-computer-games | where_exp: "post", "post.subseries == nil" | reverse %}
 {% for post in model_posts %}
   <li>
     <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
@@ -37,6 +37,25 @@ These posts aim to create mathematical foundations for game-specific programming
 <ul class="post-list">
 {% assign logic_posts = site.categories.modelling-computer-games | where: "subseries", "logic" | reverse %}
 {% for post in logic_posts %}
+  <li>
+    <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+    <h3>
+      <a class="post-link" href="{{ post.url | relative_url }}">
+        {{ post.title | escape }}
+      </a>
+    </h3>
+  </li>
+{% endfor %}
+</ul>
+
+<br/>
+<br/>
+
+### The Language
+
+<ul class="post-list">
+{% assign language_posts = site.categories.modelling-computer-games | where: "subseries", "language" | reverse %}
+{% for post in language_posts %}
   <li>
     <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
     <h3>

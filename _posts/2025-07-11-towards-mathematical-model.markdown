@@ -71,8 +71,8 @@ Each handler in a robotic script issues commands instructing its robot to intera
 
 From this discussion, we extract some key features we would like to model.
 * Robots that affect the physical world by making requests to an environment. The environment may or may not honor these requests at its discretion.
-* A specific type of request a Robot can make to the environment is *message sending* to another agent, as when the fuse box sends the "fuse box off" message to Roy
-* Agents receive messages from the environment and other agents; these message may affect their behavior. The environment can be viewed as a mediator, so that all messages received by robot $$B$$ from robot $$A$$ can be viewed as coming directly from the environment and indirectly from robot $$B$$.
+* A specific type of request a Robot can make to the environment is *message sending* to another agent, as when the fuse box sends the "fuse box off" message to Roy.
+* Agents receive messages from the environment and other agents; these message may affect their behavior. The environment can be viewed as a mediator, so that all messages received by robot $$B$$ from robot $$A$$ can be viewed as coming directly from the environment and indirectly from robot $$A$$.
 
 # Computer games as dynamical systems
 
@@ -86,12 +86,12 @@ Now that we've highlighted the features that we wish to focus on modelling by ta
 <figcaption>Diagram 1</figcaption>
 </figure>
 
-We can view the game's state as encapsulated in the game stepper; nothing outside of the game stepper may modify its internal state. The game evolves over a sequence of discrete time steps. At each time step, the game stepper must compute two quantities.
+We can view the game's state as encapsulated in the game stepper; nothing outside of the game stepper may modify its internal state. The game evolves over a sequence of discrete time steps. At each time step, the game stepper must compute two quantities:
 
 * From the game's current state, the game stepper must compute its output, a matrix of color values to display to the screen.
 * The game stepper must also compute the game's next state from its input and its current state.  Its input might be a mapping from key identifiers to booleans indicating whether each key is pressed. The game's state might contain a matrix of physical locations, where each location contains an identifier denoting either a game character, a wall, or an empty space.
 
-Put differently, the game stepper is a pair of two functions
+Put differently, the game stepper is a pair of two functions:
 
 $$\mathit{output} : \mathit{GameState} \to \mathit{Output} $$
 
@@ -127,11 +127,11 @@ $$\mathit{nextState} : 1 \times \mathit{GameState} \to \mathit{GameState}$$
 
 The idea here is that computing an output in the set $$1$$ is equivalent to not computing an output at all, because choosing an element of a one-element set does not involve making a decision. Likewise an element of $$(\ast, s)$$ of $$1 \times \mathit{GameState}$$ is equivalent to $$s$$ since $$\ast$$ is the only choice for the first component of the pair.
 
-A box doesn't seem very interesting as a diagram. It becomes interesting when we compose it from stateful subcomponents. Each subcomponent is a dynamical system that transforms its current state into output, and also transforms input and an internal state into a next internal state at each point in a sequence of time steps.
+A box isn't very interesting as a diagram. It becomes interesting when we compose it from stateful subcomponents. Each subcomponent is a dynamical system that transforms, at each point in a sequence of time steps, its current state into output and its input and internal state into the next internal state.
 
-What are the stateful subcomponents? As a first approximation, they are
+What are the stateful subcomponents? As a first approximation, they are:
 
-* The environment, whose state consists of the grid of available and occupied cells
+* The environment, whose state consists of the grid of available and occupied cells.
 * The robots. The internal state of the fuse box may track whether it is on or off. The internal state of Roy may contain a program counter that determines which of the instructions such as `go SOUTH` or `go EAST` he will perform at the next time step.
 
 Note that the position of each robot is part of the simulated "physical world" and is thus contained in the internal state of the environment rather than the internal state of the robot itself. This is why a robot can only make a *request* to move to an adjacent grid cell, and it is ultimately the environment's decision whether or not to honor that request.
@@ -144,7 +144,7 @@ We've examined MegaZeux's *robot* system, which is used to simulate complex obje
 * A robot has internal state, but it's a purely "mental" state that is used to make decisions. Physical properties of the robot are stored in the environment's internal state.
 * A robot may send a message to another robot, which represents information sent along some physical communication medium.
 
-In my next post, I will define a game stepper for tic-tac-toe, which resembles MegaZeux in a few different ways
+In my next post, I will define a game stepper for tic-tac-toe, which resembles MegaZeux in a few different ways:
 
 * The environment is the game board.
 * The two players, like robots, submit requests to the environment. Their internal state can be used for planning and decision making, but is isolated from the physical rules of the game board.

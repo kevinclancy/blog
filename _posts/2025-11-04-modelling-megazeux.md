@@ -277,7 +277,7 @@ $$\mathit{nextState}_{\mathit{Env}}(z, a) \defeq (0, \ast)$$
 
 For each robot identifier $$i \in \mathbf{n}$$, we write $$\mathit{Robot}_i$$ for the partial possibilistic system corresponding to robot $$i$$.
 
-We posit the existence of a set $$\Sigma_i$$ containing the *mental state* of robot $$i$$. An element of $$\Sigma_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$\Sigma_i$$ and $$\Sigma_j$$ are not required to be equal and are typically distinct.
+We posit the existence of a set $$\Sigma_i$$ whose elements are *mental states* of robot $$i$$. An element of $$\Sigma_i$$ might contain a program counter for the script robot $$i$$ is currently running, and it might contain private data members as well. For distinct $$i,j \in \mathbf{n}$$ the sets $$\Sigma_i$$ and $$\Sigma_j$$ are not required to be equal and are typically distinct.
 
 In addition to mental state, the state of robot $$i$$ also contains *administrative state*. The administrative state $$S$$, which is uniform across all robots, synchronizes the robot with the environment and stages actions to transmit to the environment.
 

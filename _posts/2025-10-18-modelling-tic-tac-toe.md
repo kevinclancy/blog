@@ -69,7 +69,7 @@ The passforward function of a lens can be viewed as sending information "downstr
 > That is, a dynamical system is a lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
 
 Above, we consider $$\mathit{State}$$ the type of our dynamical system's internal state, $$\mathit{In}$$ the type of its input, and $$\mathit{Out}$$ the type of its output. Expanding the definition of lens, we see that
-* $$\mathit{nextState} : \mathit{State} \times \mathit{In} \to \mathit{State}$$ is a function that takes a pair of a "current" state and an input to a "next" state.
+* $$\mathit{nextState} : \mathit{State} \times \mathit{In} \to \mathit{State}$$ is a function that takes a pair of a *current* state and an input to a *next* state.
 * $$\mathit{output} : \mathit{State} \to \mathit{Out}$$ is a function that takes a state to an output.
 
 This matches the intuitive structure of game engines that I presented previously. Those familiar with digital logic may know the distinction between *Moore machines* and *Mealy machines*: the output of a Mealy machine may depend both on its input and its current state, whereas the output of a Moore machine may only depend on its current state. In this sense, a dynamical system is like a Moore machine rather than a Mealy machine: before its input can affect its output, it must store the input in its state as an intermediate step. This can be a bit awkward sometimes, but it's not a fundamental problem.
@@ -88,7 +88,7 @@ Figure 1
 
 Note that the set $$\mathit{State}_S$$ does not appear in the diagram, because it does not affect the systems that $$S$$ interacts with.
 
-If the codomain of one lens matches the domain of another then we can compose them together.
+If the codomain of one lens matches the domain of another then we can compose them together:
 
 > **Definition**
 >
@@ -99,7 +99,7 @@ If the codomain of one lens matches the domain of another then we can compose th
 > * $$h$$ is defined as the function composite $$g \circ f$$
 > * $$h^\sharp$$ is defined such that $$h^\sharp(a^+, c^-) \defeq f^\sharp(a^+, g^\sharp(f(a^+), c^-))$$
 
-We also have a parallel composition operator on lenses.
+We also have a parallel composition operator on lenses:
 
 > **Definition**
 >

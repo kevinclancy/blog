@@ -36,6 +36,7 @@ plugins:
 minima:
   nav_pages:
     - modelling-computer-games.md
+    - understanding-module-systems.md
     - portfolio.markdown
     - vidz.markdown
 
