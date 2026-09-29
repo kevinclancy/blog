@@ -1,0 +1,26 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{amsmath}
+\begin{document}
+\begin{tikzpicture}[
+    x=1.6cm, y=1.35cm,
+    every node/.style={inner sep=3pt, font=\large},
+    line/.style={draw=black!80, line width=0.6pt, shorten >=1pt, shorten <=1pt}
+  ]
+  % top
+  \node (unk)   at ( 0, 2) {$?$};
+  % middle
+  \node (n)     at (-1, 1) {$n$};
+  \node (oinf)  at ( 1, 1) {$1^{\omega\infty}$};
+  % bottom
+  \node (zero)  at (-2, 0) {$0$};
+  \node (om)    at ( 0, 0) {$1^{\omega}$};
+  \node (inf)   at ( 2, 0) {$\infty$};
+
+  \draw[line] (unk)  -- (n);
+  \draw[line] (unk)  -- (oinf);
+  \draw[line] (n)    -- (zero);
+  \draw[line] (n)    -- (om);
+  \draw[line] (oinf) -- (om);
+  \draw[line] (oinf) -- (inf);
+\end{tikzpicture}
+\end{document}
