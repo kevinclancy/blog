@@ -187,7 +187,7 @@ $$\mathit{nextState}_{\mathit{Env}} : (\mathbf{2}^{\mathbf{w} \times \mathbf{h}}
 
 We need a few helper functions. First, given a robot position map $$r$$ and an action $$a \in \mathit{Act}$$, we define $$\mathit{move}(r, i, a)$$ to compute the proposed new position for robot $$i$$:
 
-$$\mathit{move} : (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathbf{n} \times \mathit{Act} \to \mathbf{w} \times \mathbf{h}$$
+$$\mathit{move} : (\mathbf{w} \times \mathbf{h})^{\mathbf{n}} \times \mathbf{n} \times \mathit{Act} \to \mathbb{Z} \times \mathbb{Z}$$
 
 $$\mathit{move}(r, i, a) \defeq \begin{cases}
 (x, y) & \text{if } a = I \\
