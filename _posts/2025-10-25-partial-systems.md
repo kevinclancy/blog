@@ -115,8 +115,8 @@ The environment's output function can then be defined as follows:
 
 $$
 \mathit{output}_\mathit{Environment}(t, b) \defeq \begin{cases}
-((1, b), n) & \text{ if } t = SubmitTo(n) \\
-((0, \ast), 2) & \text{ if } t = ReceiveFrom(n)
+(b, n) & \text{ if } t = SubmitTo(n) \\
+(b, 2) & \text{ if } t = ReceiveFrom(n)
 \end{cases}
 $$
 

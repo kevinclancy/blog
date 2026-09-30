@@ -173,7 +173,7 @@ since the echo box's update function never fails and returns whatever state it i
 
 $$\vrt{\mathit{nextState}_{\mathit{Environment}}}{\mathit{output}_{\mathit{Environment}}}_{\!\ast}\; \mathsf{echo}^{(\mathit{ReceiveFrom}(0),\, b_0)}_{\mathit{State}_{\mathit{Environment}}}$$
 
-on the arena $$\vrt{1 + \mathit{Loc}}{(1 + \mathit{Board}) \times \mathbf{3}}$$.
+on the arena $$\vrt{1 + \mathit{Loc}}{\mathit{Board} \times \mathbf{3}}$$.
 
 Pushforward also interacts well with lens composition. Write $$\mathsf{id} : \vrt{A}{B} \leftrightarrows \vrt{A}{B}$$ for the identity partial lens, whose passforward is the identity function on $$B$$ and whose passback is $$(b, a) \mapsto \kappa_2\, a$$.
 

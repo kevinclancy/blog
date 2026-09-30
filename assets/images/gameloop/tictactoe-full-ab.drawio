@@ -55,7 +55,7 @@
             <mxPoint x="600" y="321" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="jVBMLtscBEM3OXXfgbqj-18" value="1 + Board" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];labelPosition=center;verticalLabelPosition=top;" parent="jVBMLtscBEM3OXXfgbqj-15" vertex="1" connectable="0">
+        <mxCell id="jVBMLtscBEM3OXXfgbqj-18" value="Board" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];labelPosition=center;verticalLabelPosition=top;" parent="jVBMLtscBEM3OXXfgbqj-15" vertex="1" connectable="0">
           <mxGeometry x="-0.0606" y="-2" relative="1" as="geometry">
             <mxPoint y="-3" as="offset" />
           </mxGeometry>

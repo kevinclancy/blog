@@ -457,17 +457,17 @@ $$\mathit{State}_{\mathit{Environment}} \defeq \mathit{StepType} \times \mathit{
 
 As figure 11 shows, the environment's output set is
 
-$$\mathit{Out}_{\mathit{Environment}} \defeq (1 + \mathit{Board}) \times \mathbf{3}$$
+$$\mathit{Out}_{\mathit{Environment}} \defeq \mathit{Board} \times \mathbf{3}$$
 
 The environment's $$\mathit{output}_\mathit{Environment} : \mathit{State}_{\mathit{Environment}} \to \mathit{Out}_{\mathit{Environment}}$$ function is then defined as
 
-$$\mathit{output}_\mathit{Environment} : \mathit{StepType} \times \mathit{Board} \to (1 + \mathit{Board}) \times \mathbf{3}$$
+$$\mathit{output}_\mathit{Environment} : \mathit{StepType} \times \mathit{Board} \to \mathit{Board} \times \mathbf{3}$$
 
 $$
 \mathit{output}_\mathit{Environment}(t, b) \defeq \begin{cases}
-((1, b), n) & \text{ if } t = SubmitTo(n) \\
-((0, \ast), 2) & \text{ if } t = ReceiveFrom(n) \\
-((0, \ast), 2) & \text{ if } t = IllegalState
+(b, n) & \text{ if } t = SubmitTo(n) \\
+(b, 2) & \text{ if } t = ReceiveFrom(n) \\
+(b, 2) & \text{ if } t = IllegalState
 \end{cases}
 $$
 
