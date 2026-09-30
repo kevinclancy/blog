@@ -36,7 +36,7 @@ We will construct this closed system out of open systems such as the players. Th
 <img src="/assets/images/gameloop/ttt-player.drawio.png">
 </center>
 
-The above system is considered *open* because its input and output are not one-element sets; they contain actual information that must be received from and sent to unspecified destinations. Each turn, an element of $$BoardState$$, representing the current state of the board, is received as input. The player uses this board state, possibly along with the player's own internal state, to decide a move to submit to the board.
+The above system is considered *open* because its input and output are not one-element sets; they contain actual information that must be received from and sent to unspecified destinations. Each turn, an element of $$\mathit{Board}$$, representing the current state of the board, is received as input. The player uses this board state, possibly along with the player's own internal state, to decide a move to submit to the board.
 
 Now, let's develop a formalism that allows us to compose complex systems from simpler systems.
 
@@ -308,7 +308,7 @@ To express the set of values that each belong to exactly one of the disjoint set
 >
 > $$X + Y \defeq \{ (0,x) \mid x \in X \} \cup \{ (1,y) \mid y \in Y \}$$
 
-By tagging values with either $$0$$ or $$1$$, we ensure that the elements of the two operands are treated as mutually exclusive; it may be instructive to compare the set $$1 = 1 \cup 1$$ with the set $$1 + 1$$. Each of a demultiplexor's output wires then has type $$\mathit{Payload} + 1$$.
+By tagging values with either $$0$$ or $$1$$, we ensure that the elements of the two operands are treated as mutually exclusive; it may be instructive to compare the set $$1 = 1 \cup 1$$ with the set $$1 + 1$$. Each of a demultiplexor's output wires then has type $$1 + \mathit{Payload}$$.
 
 Recall that, if $$X$$ is a set, then $$X \times \overset{n}{\cdots} \times X$$ is the set of $$n$$-ary tuples $$(x_0, \ldots, x_{n-1})$$. We are now ready to formally define the notion of demultiplexor circuits.
 
