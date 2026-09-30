@@ -23,8 +23,8 @@ When you read that post, you probably understood that $$\mathit{IllegalState}$$ 
 
 The idea is that we have engineered our dynamical system such that none of the above three scenarios ever arises given that our initial state is valid. The set of conditions which are true for exactly those state/input pairs expected by our lens are called the lens's *preconditions*. Unexpected state/input pairs such as the three listed above are called *precondition violations*. The environment system's preconditions are
 
-* Locations $$(1,\ell)$$ must only be provided as the first component of the input when in a $$\mathit{ReceiveFrom}$$ state
-* An "Empty input" $$(0, \ast)$$ must only be provided as the first component of the input when in a $$\mathit{SubmitTo}$$ state
+* Locations $$(1,\ell)$$ must only be provided as the input when in a $$\mathit{ReceiveFrom}$$ state
+* An "Empty input" $$(0, \ast)$$ must only be provided as the input when in a $$\mathit{SubmitTo}$$ state
 * The system must never be in $$\mathit{IllegalState}$$
 
 Making both off rails and on rails states siblings, in the sense that they are elements of the same set $$\mathit{StepType}$$, is obfuscating. Off rails states should be distinguished from on rails states formally--not just with suggestive names such as $$\mathit{IllegalState}$$.
@@ -53,7 +53,7 @@ From this, we derive a notion of partial dynamical systems.
 >
 > $$\vrt{\mathit{nextState}}{\mathit{output}} : \vrt{\mathit{State}}{\mathit{State}} \leftrightarrows \vrt{\mathit{In}}{\mathit{Out}}$$
 >
-> That is, a partial dynamical system is a lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
+> That is, a partial dynamical system is a partial lens whose domain is an arena of the form $$\vrt{\mathit{State}}{\mathit{State}}$$ for some set $$\mathit{State}$$.
 
 Taking this definition apart, we can see that a partial dynamical system is a pair of two functions:
 
