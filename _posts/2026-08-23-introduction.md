@@ -9,14 +9,14 @@ published: true
 
 Programmers often use dictionary datatypes to track associations between entities. A programmer types the following code
 ```
-age_map.insert("joe", 20)
-age_map.insert("bob", 30)
+insert age_map "joe" 20
+insert age_map "bob" 30
 ```
-and understands that next time that their program encounters the expression `age_map.get("joe")` it will return the last value passed in as the second argument in `age_map.insert("joe", ____)`, namely `20` if no other calls to `insert` are made.
+and understands that next time the expression `get age_map "joe"` is evaluated, it will return the last value passed in as the third argument in `insert age_map "joe" ____`, namely `20` if no other calls to `insert` are made.
 
-What the programmer does *not* need to understand is *why* invoking `age_map.get` reliably recalls `20`. The real reason is that `age_map` refers to a piece of data that is structured in a specific way that records associations. It may be implemented in terms of a hash table, or possibly a balanced binary tree. But those details are a distraction when trying to reason about real-world entities and high level business logic.
+What the programmer does *not* need to understand is *why* invoking `get age_map "joe"` reliably recalls `20`. The reason why is that `age_map` refers to a piece of data that is structured in a specific way that records associations; perhaps it is structured as a hash table or a balanced binary tree. But this detail is a distraction when trying to reason about real-world entities and high level business logic.
 
-*Module systems* are a language feature that allow us to hide data representations such as hash tables and binary trees by "covering" them with constructs called *signatures*, which consist of the following components:
+*Module systems* are a language feature that allow us to hide data representations such as hash tables and binary trees by "covering" them with constructs called *signatures*. A signature consists of the following components:
 
 * A set of data types defining the sorts of entities that can be manipulated.
 * A set of operations to be performed on the entities.
@@ -28,7 +28,7 @@ type t
 val insert : t -> string -> int -> unit
 val get : t -> string -> int
 ```
-Above, `t` is the type of age maps, which the value `age_map` belongs to. And `unit` is the type of the empty tuple; it's returned by functions that are called only for their side effects.
+Above, `t` is the type of age maps, to which the value `age_map` belongs. And `unit` is the type of the empty tuple; it's returned by functions that are called only for their side effects.
 
 In addition, the signature should also contain a behavior specification. Intuitively, it would list behavioral equations such as the following:
 ```
@@ -39,11 +39,11 @@ In addition, the signature should also contain a behavior specification. Intuiti
 *)
 ```
 
-Above is a "pseudocode specification", in that it doesn't conform to any formally defined specification language that I know of. It says that if we insert `(name,age)` into the map and then do not insert any other age corresponding to `name` before calling `get map name`, then `get map name` should return `age`. More concisely, an entry inserted into the map stays there unless we override it.
+Above is a "pseudocode specification", in that it doesn't conform to a formally defined specification language. It says that if we insert an association of `name` with `age` into the map and then do not insert any other association of `name` before calling `get map name`, then `get map name` should return `age`. More concisely, an entry inserted into the map stays there unless we override it.
 
 The reason the above specification is pseudo-code rather than formal is that there is no widely used specification language for module signatures. Some have been developed; the most modern one that I know of is Gospel for OCaml. However, it's not clear that any are production ready. There are a variety of reasons why signature specifications aren't built in to modern module systems. Among them, deciding conformance to such specifications is undecidable.
 
-Nonetheless, it should be obvious that specifications are a fundamental aspect of signatures. In modern software, they're present informally, as careful comments and field names which, like "map", reference commonly understood concepts. It's a mistake to explain module systems without acknowledging this, in the same way that it's a mistake to explain functions without acknowledging that they may have preconditions and postconditions that are more precise than a type system can express.
+Nonetheless, it should be obvious that specifications are a fundamental aspect of signatures. In modern software, they're present informally, as careful comments and field names which, like "insert", reference commonly understood concepts. It's a mistake to explain module systems without acknowledging this, in the same way that it's a mistake to explain functions without acknowledging that they may have preconditions and postconditions that are more precise than a type system can express.
 
 # Example - Functional Queues
 
@@ -113,13 +113,13 @@ end
 
 This signature describes *functional* queues in particular, meaning that each of the operations leave their argument queues intact. For example, `push q v` returns a new queue that behaves as `q` but with an additional element `v` pushed to its back; at the same time, we still have access to `q` even after calling `push` and binding its result to a variable `q'`.
 
-This signature can be thought of as a *vocabulary*, declaring *types* that classify the objects or entities of the vocabulary (or "values" in programming terminology), as well as declaring *operations* that can be used to manipulate the entities. Above, we can see that OCaml's type declarations start with the keyword `type` and that its operation declarations start with the keyword `val`. However, importantly, the signature should also define *laws* constraining how the operations behave across multiple calls. Since OCaml has no built-in capacity to express such laws, I've included the laws as comments that begin with the text "LAW". Note that the laws are somewhat redundant with respect to the comments that have already been attached to values. In practice, laws typically are inferred from the val fields names and the comments attached to them, not from standalone comments labelled with "LAW".
+This signature can be thought of as a *vocabulary*, declaring *types* that classify the objects or entities of the vocabulary, as well as declaring *operations* that can be used to manipulate the entities. Above, we can see that OCaml's type declarations start with the keyword `type` and that its operation declarations start with the keyword `val`. However, importantly, the signature should also define *laws* constraining how the operations behave across multiple calls. Since OCaml has no built-in capacity to express such laws, I've included the laws as comments that begin with the text "LAW". Note that the laws are somewhat redundant with respect to the comments that have already been attached to values. In practice, laws typically are inferred from the val fields names and the comments attached to them, not from standalone comments labelled with "LAW".
 
 ## Implementing Signatures using Structs
 
 While the signature describes how functional queues can be used, we cannot provide access to functional queues until we have *implemented* the signature by defining a struct. A struct can be thought of as a list of definitions of two kinds:
 
-* For each type declaration in the signature, the struct must have a matching concrete type definition.
+* For each type declaration (or type family declaration) in the signature, the struct must have a matching concrete type definition (or type family definition).
 * For each val declaration in the signature, the struct must have a concrete value definition (a let binding) whose type matches the declaration's.
 
 Furthermore, the operations defined by the concrete value definitions must obey the signature's laws.
@@ -147,7 +147,7 @@ module Q : Queue = ListQueue
 
 It provides a family of concrete representations `'a list` for the abstract type family `'a t`. Then, it provides concrete values implementing each of the `Queue` signature's values.
 
-The `: Queue` on the bottom line seals the `Queue` signature over the `ListQueue` struct. This first checks that the types of the `ListQueue` struct's let bindings match the `Queue` signature's val declarations. Then, it "creates a barrier" so that any client making use of `Q` cannot treat a value of type `'a Q.t` as a value of type `'a list` by pattern matching it into a cons cell or a nil list. Instead, all its clients can do is manipulate values of type `'a Q.t` using the vocabulary provided by `Queue`: namely, the `empty` value and the `push`, `pop`, and `is_empty` operations.
+The `: Queue` on the bottom line seals the `Queue` signature over the `ListQueue` struct, producing a module named `Q`. This first checks that the types of the `ListQueue` struct's let bindings match the `Queue` signature's val declarations and that the `ListQueue` struct's type definitions match the signature's type declarations. Then, it "creates a barrier" so that any client making use of `Q` cannot treat a value of type `'a Q.t` as a value of type `'a list` by pattern matching it into a cons cell or a nil list. Instead, the only thing clients of `Q` can do is manipulate values of type `'a Q.t` using the vocabulary provided by `Queue`: namely, the `empty` value and the `push`, `pop`, and `is_empty` operations.
 
 Note that the struct `ListQueue` is not an efficient queue implementation, because its `push` operation is O(n). A benefit of sealing is that when replacing the current implementation struct with a more efficient one, we need only check that the new implementation satisfies the `Queue` signature once. We do not need to check whether each individual client of `Q` is compatible with the new implementation.
 
@@ -155,21 +155,21 @@ Note that the struct `ListQueue` is not an efficient queue implementation, becau
 
 Once a struct has been sealed, we've obtained the "final product" of module systems: a "vocabulary" comprising a set of opaque types paired with a set of operations that can be performed on them, obeying a set of laws defined by the signature. The only thing left is to use this vocabulary. There are essentially two ways to do this:
 
-* 1 - Use the sealed module to implement a function.
-* 2 - Use the sealed module to construct another (higher level) sealed module.
+1. Use the sealed module to implement a function.
+2. Use the sealed module to construct another (higher level) sealed module.
 
 ## Using modules to implement functions
 
 Here, I will demonstrate type 1 in depth.
 
-One of the most well-known applications of the Queue abstract datatype is to implement the standard "breadth-first search" (or "BFS" for short) algorithm. This algorithm takes the node `source` of a graph as input and computes the shortest path from source to every other node in the graph.
+One of the most well-known applications of the Queue abstract datatype is the standard "breadth-first search" (or "BFS" for short) algorithm. This algorithm takes the node `source` of a graph as input and computes the shortest path from source to every other node in the graph.
 
 In addition to access to the Queue datatype, the BFS algorithm requires access to the nodes and edges of a graph. For this, we define another signature:
 
 ```
 module type TraverseGraph = sig
-  (** An directed graph of location nodes, only some of which are traversable.
-      This graph is static, in that traversability and adjacency do not change over time.
+  (** A directed graph.
+      This graph is static, in that adjacency does not change over time.
   *)
 
   type node
@@ -179,7 +179,7 @@ module type TraverseGraph = sig
   (** [compare_node n m] Returns 0 iff node [n] equals node [m] *)
 
   val adjacent_nodes : node -> node list
-  (** [adjacent_nodes n] All traversable nodes adjacent to node [n] *)
+  (** [adjacent_nodes n] All nodes adjacent to node [n] *)
 
   (* LAW:
      The relation Eq defined such that
@@ -304,7 +304,7 @@ let shortest_path (module T : TraverseGraph)
   construct_path dest []
 ```
 
-Note that while the above function takes the `TraverseGraph` module as an argument `T`, the `Queue` module is referenced via a module identifier `Q` in context, as a "global". The reason for the distinction is that any two modules implementing the `Queue` signature are observationally indistinguishable, so we only need one implementation in our program. On the other hand, different `TraverseGraph` implementations may have distinct set of nodes and edges, and so distinct calls to `shortest_path` can take distinct `T` modules implementing `TraverseGraph` as arguments.
+Note that while the above function takes the `TraverseGraph` module as an argument `T`, the `Queue` module is referenced via a module identifier `Q` in context, as a "global". The reason for the distinction is that any two modules implementing the `Queue` signature are observationally indistinguishable (ignoring performance differences), so we only need one implementation in our program. On the other hand, different `TraverseGraph` implementations may have distinct set of nodes and edges, and so distinct calls to `shortest_path` can take distinct `T` modules implementing `TraverseGraph` as arguments.
 
 ## Faulty sealing
 
@@ -336,7 +336,7 @@ Because `ListStack` does not satisfy the "First-In-First-Out" law that queues do
 
 # Using modules to implement modules
 
-## Implementing modules uing global modules
+## Implementing modules using global modules
 
 A long running process could implement a batch scheduler that executes tasks submitted from an external source at a regular interval. For fairness, we want to perform the earliest submitted tasks first, so we store them in a queue data structure.
 
@@ -384,7 +384,7 @@ Both the types and value bindings in `JQ` can be defined in terms of types and t
 
 ## Implementing modules using parameter modules
 
-Here `JQ` is defined in reference to `Q`, a specific implementation of the `Queue` signature. Because `Queue` provides a full specification of a module's behavior, there is no reason we would need to use multiple distinct `Queue` implementatations in the same program. However, we could weaken the `Queue` signature into a more general signature `PushPopBag` that does not enforce any ordering, satisfied by both the queue struct and the stack struct, as well as an implementation which allows `pop` to produce a randomly chosen element from the set.
+Above, `JQ` is defined in reference to `Q`, a specific implementation of the `Queue` signature. Because `Queue` provides a full specification of a module's behavior (ignoring performance characteristics), there is no reason we would need to use multiple distinct `Queue` implementations in the same program. However, we could weaken the `Queue` signature into a more general signature `PushPopBag` that does not enforce any pop ordering, and which is satisfied by both the queue struct and the stack struct, as well as an implementation which allows `pop` to produce a randomly chosen element from the set.
 
 ```
 module type PushPopBag = sig
@@ -398,8 +398,7 @@ module type PushPopBag = sig
 
   val push : 'a t -> 'a -> 'a t
   (**
-    [b' = push b v] pushes element [v] into the bag [b] to
-    obtain [b']
+    [b' = push b v] pushes element [v] into the bag [b], yielding [b']
   *)
 
   val pop : 'a t -> 'a * 'a t
@@ -433,7 +432,7 @@ module type PushPopBag = sig
   (* LAW:
 
      If c is the bag of elements underlying a push-pop bag b,
-     then the bag underlying [push b a] is c + a (a inserted into c)
+     then the bag underlying [push b a] is c + a (an occurrence of a inserted into c)
 
   *)
 
@@ -495,6 +494,6 @@ I will wrap things up with a physical world analogy. Modules are like soda vendi
 * Product selection
 * Coin return
 
-Coin insertion, for example, requires a coin and a vending machine as input, and produces a modified vending machine as output. The consumer knows that if she inserts a coin and then selects a product, she will probably receive a soda. It is not enough for the machine to merely provide the three operations listed above; it must obey laws (its signature's laws) that are mutually understood by the machine's creator and its consumer. For example, the consumer knows that if she performs "coin insertion" and then performs "coin return" immediately afterward, the machine should emit the inserted coin. However, the consumer does not care about where her coin is stored in between, the shape and volume of its container, etc. These details are hidden from the consumer to make her life easier.
+Coin insertion, for example, requires a coin and a vending machine as input, and produces a modified vending machine as output. The consumer knows that if she inserts a coin and then selects a product, she will probably receive a soda. It is not enough for the machine to merely provide the three operations listed above; it must obey laws (its signature's laws) that are mutually understood by the machine's creator and its consumer. For example, the consumer knows that if she performs "coin insertion" and then performs "coin return" immediately afterward, the machine should emit the inserted coin. However, the consumer does not care about where her coin is stored in between the two operations, the shape and volume of its container, etc. These details are hidden from the consumer to make her life easier.
 
 So far, we have used comments to express a signature's laws. In my next post, I will explore more formal techniques for doing so.

@@ -90,7 +90,7 @@ Above, $$\mathsf S$$ must be a signature that has an opaque type component named
 Here is an example usage of sharing constraints. Recall the `TraverseGraph` signature from [my first post]({% post_url 2026-08-23-introduction %}):
 ```
 module type TraverseGraph = sig
-  (** An undirected graph of location nodes, only some of which are traversable.
+  (** A directed graph.
       This graph is static, in that traversability and adjacency do not change over time.
   *)
 
