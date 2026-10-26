@@ -3,9 +3,15 @@ layout: post_classic
 title: "6. Applicativity and Generativity"
 date: 2026-10-24 09:00 -0700
 categories: [understanding-module-systems]
-published: false
+published: true
 ---
 
+Given two applications of the same functor `F`:
+```
+module M = F(X)
+module N = F(Y)
+```
+should `M.t` and `N.t` be considered the same type? This post explores this question in depth and presents OCaml's answer.
 
 # Invariants
 
@@ -90,5 +96,148 @@ They are in fact distinct representations, because `sym2string` refers to distin
 let sym2string : (symbol, string) Hashtbl.t = Hashtbl.create 64
 ```
 
-The function `Hashtbl.create` is effectful in the sense that its result is determined not just by its arguments, but by *state* that is implicitly threaded through every expression in our OCaml code. This state influences `Hashtbl.create` to allocate distinct hash tables each time it is called, and returns references to these distinct hash tables.
+The function `Hashtbl.create` is effectful in the sense that its result is determined not just by its arguments, but by *state* that is implicitly threaded through every expression in our OCaml code. This state influences `Hashtbl.create` to allocate distinct hash tables each time it is called, and to return references to these distinct hash tables.
 
+So the type `symbol` depends on the value `sym2string`, which in turn depends on the effect of allocating a new hash table, which happens each time the functor is applied. Thus, a fresh opaque type `X.symbol` must be generated each time we apply `MakeSymbolTable`, as in `module X = MakeSymbolTable ()`. Thus, in the above example, `TermSymbolTable.symbol` and `TypeSymbolTable.symbol` are distinct types. A functor that generates abstract types, like `MakeSymbolTable` does, is said to be a *generative functor*. OCaml doesn't automatically infer what functors are generative by tracking effects; instead, we tell OCaml to make a functor such as `MakeSymbolTable` generative by declaring it with a unit parameter `()`.
+
+Because some functors, like `MakeSymbolTable`, must be generative due to effects in their bodies, we could imagine a language in which all functors are generative. While that would be sound (in fact, Standard ML is one such language), it's inconvenient. In addition to generative functors like `MakeSymbolTable`, OCaml allows us to define non-generative functors. These functors are called *applicative functors*, and will be described next.
+
+# Applicative Functors
+
+Recall our `MakeSet` functor from the previous post. It references the following signatures `Equatable` and `Set`:
+```
+module type Equatable = sig
+  type t
+  (** The type of comparable values *)
+
+  val eq : t -> t -> bool
+  (** [eq a b] Is [a] equal to [b]? *)
+
+  (* LAW:
+     The relation Eq defined such that
+
+     n Eq m <=> (eq n m) = true
+
+     is an equivalence relation (reflexive, symmetric, and transitive)
+  *)
+end
+
+module type Set = sig
+  (**
+    A signature for manipulating *sets*, which are unordered collections of unique elements
+  *)
+
+  type t
+  (** An unordered collection of unique elements *)
+
+  module Item : Equatable
+  (** Defines a type [Item.t] of elements contained in sets of type [t],
+      and provides [Item.t] with an equality test operator *)
+
+  val emptyset : t
+  (** [emptyset] is a set containing no elements *)
+
+  val member : t -> Item.t -> bool
+  (** [member s v] Is [v] a member of [s]? *)
+
+  val insert : t -> Item.t -> t
+  (** [insert s v] returns the smallest set containing [v] and all elements of [s] *)
+
+  (* LAW: for all (v : Item.t),
+           (member emptyset v) = false
+  *)
+
+  (* LAW: for all (v : Item.t) and (set : t),
+           (member (insert set v) v) = true
+  *)
+
+  (* LAW: for all (v : Item.t) (w : Item.t) and (set : t),
+           (Item.eq v w) => (member set v) = (member set w)
+  *)
+
+  (* LAW: for all (v : Item.t), (w : Item.t), and (set : t) with (Item.eq v w) = false,
+           (member (insert set v) w) = (member set w)
+  *)
+end
+```
+
+and its implementation follows:
+```
+module MakeSet (Eq : Equatable) : (Set with module Item = Eq) = struct
+  type t = Eq.t list
+
+  module Item = Eq
+
+  let emptyset = []
+
+  let rec member (set : t) (item : Item.t) : bool =
+    match set with
+    | w :: rest ->
+      begin match Eq.eq w item with
+      | true ->
+        true
+      | _ ->
+        member rest item
+      end
+    | [] ->
+      false
+
+  let insert (set : t) (item : Item.t) : t =
+    match (member set item) with
+    | true ->
+      set
+    | false ->
+      item :: set
+end
+```
+
+First, notice that the body of `MakeSet` produces no effects as it evaluates, because the right-hand sides of its let bindings are values: `emptyset` is bound to an empty list value, and `member` and `insert` are bound to function values. Therefore, the type `t` defined in the functor body does not depend on effects. However, it does rely on a refinement, namely that the elements of the list are equivalent to the elements inserted into the set according to `Eq.eq`:
+```
+type t = Eq.t list
+(* Refinement: For all Eq.t lists l of type t,
+
+    For all elements a of type Eq.t,
+    there exists an element c in l such that `(Eq.eq a c) = true` if and only if some element
+    b such that `(Eq.eq a b) = true` was inserted into the set earlier.
+*)
+```
+
+Clearly, not all applications of `MakeSet` can share the same abstract type field `t`, because `t` has a different refinement depending on the comparison function of the argument module `Eq`. However, two applications *to the same argument* indeed yield the same refinement for `t`, so when we seal the modules resulting from the applications, the `t` type fields should be treated as identical by the type checker. OCaml takes a conservative approach to recognizing that two applications of the same functor have equal arguments: it only treats them as equal if they are *paths* which are syntactically identical. A path (written P or Q below) is either:
+
+* A bound module identifier (like `IntEq`)
+* or, a projection of a module field from a path (like `P.X`)
+* or, a functor application of a path to a path (like `P(Q)`)
+
+As an example, we have the equality `MakeSet(IntEq).t = MakeSet(IntEq).t` but not `MakeSet(struct type t = int let eq a b = (a = b) end).t = MakeSet(struct type t = int let eq a b = (a = b) end).t`.
+
+Functors like `MakeSet`, which produce abstract type fields that are identified across multiple applications to the same arguments, are called *applicative functors*. Any functor *without* a unit parameter `()` is treated as applicative by OCaml. The following code demonstrates how applicative functors work:
+```
+module IntEq : (Equatable with type t = int) = struct
+  (** Integers, compared by ordinary numeric equality *)
+  type t = int
+  let eq (a : int) (b : int) : bool = a = b
+end
+
+module TrivialIntEq : (Equatable with type t = int) = struct
+  (** Collapsed integer equality where all integers are equal  *)
+  type t = int
+  let eq (a : int) (b : int) : bool = true
+end
+
+module SetA = MakeSet(IntEq)
+module SetB = MakeSet(IntEq)
+module SetC = MakeSet(TrivialIntEq)
+
+let _ = SetA.insert SetB.emptyset 3 (* Allowed, because SetA.t = SetB.t *)
+let _ = SetA.insert SetC.emptyset 3 (* Type error, because SetA.t is not equal to SetC.t *)
+```
+
+Above, the type checker considers `SetA.t` and `SetB.t` as equal, because they were obtained by applying `MakeSet` to the same path. However, `SetC` was obtained by applying `MakeSet` to a distinct path, so the type checker rejects the last line `SetA.insert SetC.emptyset 3`.
+
+# Conclusion
+
+Module sealing allows the module implementor to maintain precise invariants, or "refinements", on the values of abstract types. These invariants influence which abstract types can be viewed as identical from the perspective of a client using the sealed module.
+
+When a type field's invariant depends on an effect (such as memory allocation) that is performed each time a functor is applied, each application of the functor must generate fresh abstract types. The programmer must "mark" such type-generating functors as *generative* by declaring them with a unit parameter `()`.
+
+Even when declared type fields do not depend on effects, they may still depend on value fields of functor arguments. For example, the `MakeSet` functor produces a result whose `t` field has an invariant that depends on the argument module `Eq`'s `eq` field. Therefore, if a functor's body has no initialization effects then distinct applications to the same argument should yield identical abstract types. Such functors are called *applicative*. The programmer communicates to the OCaml compiler that a functor should be applicative by *refraining* from declaring the functor with a unit parameter `()`. The OCaml compiler takes a simplified, conservative view of when two functor arguments are equal: it only considers them equal if they are syntactically equal paths.
